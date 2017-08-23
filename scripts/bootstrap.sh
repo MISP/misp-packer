@@ -376,5 +376,3 @@ curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v h
 
 
 echo -e "\e[32mMISP is ready\e[0m"
-echo -e "\e[0mPoint your Web browser to \e[33m$MISP_BASEURL\e[0m"
-echo -e "\e[0mDefault user/pass = \e[33madmin@admin.test/admin\e[0m"

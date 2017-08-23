@@ -16,4 +16,4 @@ Launch the generation:
     $ packer build misp.json
 
 A VirtualBox image will be generated and stored in the folder
-*output-virtualbox-iso*.
+*output-virtualbox-iso*. You can import it in VirtualBox.

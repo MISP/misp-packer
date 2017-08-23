@@ -1,0 +1,60 @@
+{
+    "variables": {
+        "ssh_name": "packer",
+        "ssh_pass": "packer",
+        "hostname": "packer"
+    },
+
+    "builders": [{
+        "type": "virtualbox-iso",
+        "guest_os_type": "Ubuntu_64",
+
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--vram", "32"]
+        ],
+
+        "disk_size" : 10000,
+
+        "iso_url": "http://releases.ubuntu.com/17.04/ubuntu-17.04-server-amd64.iso",
+        "iso_checksum": "ca5d9a8438e2434b9a3ac2be67b5c5fa2c1f8e3e40b954519462935195464034",
+        "iso_checksum_type": "sha256",
+
+        "http_directory" : "preseeds",
+        "http_port_min" : 9001,
+        "http_port_max" : 9011,
+
+        "ssh_username": "{{user `ssh_name`}}",
+        "ssh_password": "{{user `ssh_pass`}}",
+        "ssh_wait_timeout": "20m",
+        "ssh_pty" : "true",
+
+        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+
+        "boot_command" : [
+            "<esc><esc><enter><wait>",
+            "/install/vmlinuz noapic ",
+            "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+            "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+            "hostname={{user `hostname`}} ",
+            "fb=false debconf/frontend=noninteractive ",
+            "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+            "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+            "initrd=/install/initrd.gz -- <enter>"
+        ]
+    }
+	],
+
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "inline": [
+            "echo '%sudo    ALL=(ALL)  NOPASSWD:ALL' >> /etc/sudoers"
+        ]
+    },
+    {
+        "type": "shell",
+        "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "script": "scripts/bootstrap.sh",
+        "pause_before": "10s"
+    }]
+}

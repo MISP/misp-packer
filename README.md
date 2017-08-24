@@ -13,7 +13,7 @@ to the IP address you will associate to your VM
 
 Launch the generation:
 
-    $ packer build misp.json
+    $ packer build -only=virtualbox-iso misp.json
 
 A VirtualBox image will be generated and stored in the folder
 *output-virtualbox-iso*. You can directly import it in VirtualBox.

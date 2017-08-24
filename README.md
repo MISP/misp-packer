@@ -18,6 +18,12 @@ Launch the generation:
 A VirtualBox image will be generated and stored in the folder
 *output-virtualbox-iso*. You can directly import it in VirtualBox.
 
+If you want to build an image for VMWare you will need to install it and to
+use the VMWare builder with the command:
+
+    $ packer build -only=vmware-iso misp.json
+
+You can also launch all builders in parallel.
 
 ### Automatic export to GitHub
 

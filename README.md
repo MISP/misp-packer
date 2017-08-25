@@ -34,6 +34,6 @@ Example of a binary upload with curl (from the GitHub blog):
 
     curl -H "Authorization: token <yours>" \
      -H "Accept: application/vnd.github.manifold-preview" \
-     -H "Content-Type: application/zip" \
-     --data-binary @build/mac/package.zip \
-     "https://uploads.github.com/repos/hubot/singularity/releases/123/assets?name=1.0.0-mac.zip"
+     -H "Content-Type: application/x-tar" \
+     --data-binary @output-virtualbox-iso/MISP_demo.ova \
+     "https://uploads.github.com/repos/MISP/MISP/releases/123/assets?name=MISP_demo.ova"

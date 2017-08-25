@@ -27,13 +27,6 @@ You can also launch all builders in parallel.
 
 ### Automatic export to GitHub
 
-- create a new release: https://developer.github.com/v3/repos/releases/#create-a-release
-- upload a release asset: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-
-Example of a binary upload with curl (from the GitHub blog):
-
-    curl -H "Authorization: token <yours>" \
-     -H "Accept: application/vnd.github.manifold-preview" \
-     -H "Content-Type: application/x-tar" \
-     --data-binary @output-virtualbox-iso/MISP_demo.ova \
-     "https://uploads.github.com/repos/MISP/MISP/releases/123/assets?name=MISP_demo.ova"
+    $ GITHUB_AUTH_TOKEN=<your-github-auth-token>
+    $ TAG=v2.4.79
+    $ ./upload.sh github_api_token=$GITHUB_AUTH_TOKEN owner=MISP repo=MISP tag=$TAG filename=./output-virtualbox-iso/MISP_demo.ova

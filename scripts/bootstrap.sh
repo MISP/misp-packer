@@ -264,8 +264,8 @@ EOF
 sudo chown -R www-data:www-data $PATH_TO_MISP/app/Config
 sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
-$PATH_TO_MISP/app/Console/cake Baseurl $MISP_BASEURL
-$PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
+sudo $PATH_TO_MISP/app/Console/cake Baseurl $MISP_BASEURL
+sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 
 echo -e "\n--- Generating a GPG encryption key... ---\n"
@@ -294,20 +294,30 @@ sudo -u www-data gpg --homedir $PATH_TO_MISP/.gnupg --batch --gen-key gen-key-sc
 
 echo -e "\n--- Making the background workers start on boot... ---\n"
 sudo chmod 755 $PATH_TO_MISP/app/Console/worker/start.sh
-sudo cat > /etc/systemd/system/workers.service  <<EOF
-[Unit]
-Description=Start the background workers at boot
+# With systemd:
+# sudo cat > /etc/systemd/system/workers.service  <<EOF
+# [Unit]
+# Description=Start the background workers at boot
+#
+# [Service]
+# Type=forking
+# User=www-data
+# ExecStart=$PATH_TO_MISP/app/Console/worker/start.sh
+#
+# [Install]
+# WantedBy=multi-user.target
+# EOF
+# sudo systemctl enable workers.service > /dev/null
+# sudo systemctl restart workers.service > /dev/null
 
-[Service]
-Type=forking
-User=www-data
-ExecStart=$PATH_TO_MISP/app/Console/worker/start.sh
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl enable workers.service > /dev/null
-sudo systemctl restart workers.service > /dev/null
+# With initd:
+if [ ! -e /etc/rc.local ]
+then
+    echo '#!/bin/sh -e' | sudo tee -a /etc/rc.local
+    echo 'exit 0' | sudo tee -a /etc/rc.local
+    sudo chmod u+x /etc/rc.local
+fi
+sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 
 
 # echo -e "\n--- Installing MISP modules... ---\n"

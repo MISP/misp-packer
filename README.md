@@ -11,7 +11,7 @@ In the file *scripts/bootstrap.sh*, set the value of ``MISP_BASEURL`` according
 to the IP address you will associate to your VM
 (for example: http://172.16.100.100).
 
-Launch the generation:
+Launch the generation with the VirtualBox builder:
 
     $ packer build -only=virtualbox-iso misp.json
 
@@ -25,7 +25,13 @@ use the VMWare builder with the command:
 
 You can also launch all builders in parallel.
 
-### Automatic export to GitHub
+### Modules activated by default in the VM
+
+* [MISP galaxy](https://github.com/MISP/misp-galaxy)
+* [MISP modules](https://github.com/MISP/misp-modules)
+* [MISP taxonomies](https://github.com/MISP/misp-taxonomies)
+
+## Automatic export to GitHub
 
     $ GITHUB_AUTH_TOKEN=<your-github-auth-token>
     $ TAG=v2.4.79

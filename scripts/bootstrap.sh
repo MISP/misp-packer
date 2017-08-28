@@ -386,3 +386,8 @@ curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v h
 
 
 echo -e "\e[32mMISP is ready\e[0m"
+echo -e "Login and passwords for the MISP image are the following:"
+echo -e "Web interface (default network settings): $MISP_BASEURL"
+echo -e "MISP admin:  admin@admin.test/admin"
+echo -e "Shell/SSH: packer/packer"
+echo -e "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"

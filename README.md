@@ -34,5 +34,5 @@ You can also launch all builders in parallel.
 ## Automatic export to GitHub
 
     $ GITHUB_AUTH_TOKEN=<your-github-auth-token>
-    $ TAG=v2.4.79
+    $ TAG=$(curl https://api.github.com/repos/MISP/MISP/releases/latest | jq  -r '.tag_name')
     $ ./upload.sh github_api_token=$GITHUB_AUTH_TOKEN owner=MISP repo=MISP tag=$TAG filename=./output-virtualbox-iso/MISP_demo.ova

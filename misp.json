@@ -2,7 +2,7 @@
     "variables": {
         "ssh_name": "misp",
         "ssh_pass": "Password1234",
-        "hostname": "packer",
+        "hostname": "misp",
         "vm_name": "MISP_demo",
         "disk_size": "10000"
     },

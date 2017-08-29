@@ -27,9 +27,9 @@ The sha1 and sha512 checksums of the generated VM will be stored in the files
 
 In case you encounter a problem with the ``MISP_BASEURL``, you can still change
 it when the VM is running. For example the IP address of your VM is
-``172.16.100.123`` you cas set ``MISP_BASEURL`` from your host with the command:
+``172.16.100.123`` you can set ``MISP_BASEURL`` from your host with the command:
 
-    $ ssh misp@172.16.100.123 sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://172.16.100.123/
+    $ ssh misp@172.16.100.123 sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://172.16.100.123
 
 If you want to build an image for VMWare you will need to install it and to
 use the VMWare builder with the command:

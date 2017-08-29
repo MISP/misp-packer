@@ -320,13 +320,14 @@ fi
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 
 
-# echo "\n--- Installing MISP modules... ---\n"
-# sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev > /dev/null 2>&1
-# cd /usr/local/src/
-# sudo git clone https://github.com/MISP/misp-modules.git
-# cd misp-modules
-# sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
-# sudo pip3 install -I . > /dev/null 2>&1
+echo "\n--- Installing MISP modules... ---\n"
+sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev > /dev/null 2>&1
+cd /usr/local/src/
+sudo git clone https://github.com/MISP/misp-modules.git
+cd misp-modules
+sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
+sudo pip3 install -I . > /dev/null 2>&1
+# With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]
 # Description=Start the misp modules server at boot
@@ -341,6 +342,10 @@ sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start
 # EOF
 # sudo systemctl enable misp-modules.service > /dev/null
 # sudo systemctl restart misp-modules.service > /dev/null
+
+# With initd:
+sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
+
 
 
 echo "\n--- Restarting Apache... ---\n"

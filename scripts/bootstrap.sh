@@ -32,28 +32,28 @@ GPG_PASSPHRASE=''
 
 
 
-echo -e "\n--- Installing MISP... ---\n"
+echo "\n--- Installing MISP... ---\n"
 
 
-echo -e "\n--- Updating packages list ---\n"
+echo "\n--- Updating packages list ---\n"
 sudo apt-get -qq update
 
 
-echo -e "\n--- Install base packages ---\n"
+echo "\n--- Install base packages ---\n"
 sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo vim zip > /dev/null 2>&1
 
 
-echo -e "\n--- Installing and configuring Postfix ---\n"
+echo "\n--- Installing and configuring Postfix ---\n"
 # # Postfix Configuration: Satellite system
 # # change the relay server later with:
 # sudo postconf -e 'relayhost = example.com'
 # sudo postfix reload
-echo "postfix postfix/mailname string `hostname`.ourdomain.org" | debconf-set-selections
+echo "postfix postfix/mailname string `hostname`.misp.local" | debconf-set-selections
 echo "postfix postfix/main_mailer_type string 'Satellite system'" | debconf-set-selections
 sudo apt-get install -y postfix > /dev/null 2>&1
 
 
-echo -e "\n--- Installing MariaDB specific packages and settings ---\n"
+echo "\n--- Installing MariaDB specific packages and settings ---\n"
 sudo apt-get install -y mariadb-client mariadb-server > /dev/null 2>&1
 # Secure the MariaDB installation (especially by setting a strong root password)
 sleep 7 # give some time to the DB to launch...
@@ -82,7 +82,7 @@ EOF
 sudo apt-get purge -y expect > /dev/null 2>&1
 
 
-echo -e "\n--- Installing Apache2 ---\n"
+echo "\n--- Installing Apache2 ---\n"
 sudo apt-get install -y apache2 apache2-doc apache2-utils > /dev/null 2>&1
 sudo a2dismod status > /dev/null 2>&1
 sudo a2enmod ssl > /dev/null 2>&1
@@ -91,15 +91,15 @@ sudo a2dissite 000-default > /dev/null 2>&1
 sudo a2ensite default-ssl > /dev/null 2>&1
 
 
-echo -e "\n--- Installing PHP-specific packages ---\n"
+echo "\n--- Installing PHP-specific packages ---\n"
 sudo apt-get install -y libapache2-mod-php php php-cli php-crypt-gpg php-dev php-json php-mysql php-opcache php-readline php-redis php-xml > /dev/null 2>&1
 
 
-echo -e "\n--- Restarting Apache ---\n"
+echo "\n--- Restarting Apache ---\n"
 sudo systemctl restart apache2 > /dev/null 2>&1
 
 
-echo -e "\n--- Retrieving MISP ---\n"
+echo "\n--- Retrieving MISP ---\n"
 mkdir $PATH_TO_MISP
 sudo chown www-data:www-data $PATH_TO_MISP
 cd $PATH_TO_MISP
@@ -111,7 +111,7 @@ sudo -u www-data git config core.filemode false
 # chmod -R 700 $PATH_TO_MISP
 
 
-echo -e "\n--- Installing Mitre's STIX ---\n"
+echo "\n--- Installing Mitre's STIX ---\n"
 sudo apt-get install -y python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
@@ -130,7 +130,7 @@ sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
 
 
-echo -e "\n--- Retrieving CakePHP... ---\n"
+echo "\n--- Retrieving CakePHP... ---\n"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
 cd $PATH_TO_MISP
 sudo -u www-data git submodule init
@@ -146,7 +146,7 @@ sudo phpenmod redis
 sudo -u www-data cp -fa $PATH_TO_MISP/INSTALL/setup/config.php $PATH_TO_MISP/app/Plugin/CakeResque/Config/config.php
 
 
-echo -e "\n--- Setting the permissions... ---\n"
+echo "\n--- Setting the permissions... ---\n"
 sudo chown -R www-data:www-data $PATH_TO_MISP
 sudo chmod -R 750 $PATH_TO_MISP
 sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
@@ -154,7 +154,7 @@ sudo chmod -R g+ws $PATH_TO_MISP/app/files
 sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 
 
-echo -e "\n--- Creating a database user... ---\n"
+echo "\n--- Creating a database user... ---\n"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "create database $DBNAME;"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant usage on *.* to $DBNAME@localhost identified by '$DBPASSWORD_MISP';"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant all privileges on $DBNAME.* to '$DBUSER_MISP'@'localhost';"
@@ -163,30 +163,30 @@ sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "flush privileges;"
 sudo -u www-data mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME < /var/www/MISP/INSTALL/MYSQL.sql
 
 
-echo -e "\n--- Configuring Apache... ---\n"
+echo "\n--- Configuring Apache... ---\n"
 # !!! apache.24.misp.ssl seems to be missing
 #cp $PATH_TO_MISP/INSTALL/apache.24.misp.ssl /etc/apache2/sites-available/misp-ssl.conf
 # If a valid SSL certificate is not already created for the server, create a self-signed certificate:
-sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
+sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null
 
 
-echo -e "\n--- Add a VirtualHost for MISP ---\n"
+echo "\n--- Add a VirtualHost for MISP ---\n"
 sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
 <VirtualHost *:80>
-        ServerAdmin me@me.local
-        ServerName misp.local
-        DocumentRoot $PATH_TO_MISP/app/webroot
+    ServerAdmin admin@misp.local
+    ServerName misp.local
+    DocumentRoot $PATH_TO_MISP/app/webroot
 
-        <Directory $PATH_TO_MISP/app/webroot>
-            Options -Indexes
-            AllowOverride all
-            Require all granted
-        </Directory>
+    <Directory $PATH_TO_MISP/app/webroot>
+        Options -Indexes
+        AllowOverride all
+        Require all granted
+    </Directory>
 
-        LogLevel warn
-        ErrorLog /var/log/apache2/misp.local_error.log
-        CustomLog /var/log/apache2/misp.local_access.log combined
-        ServerSignature Off
+    LogLevel warn
+    ErrorLog /var/log/apache2/misp.local_error.log
+    CustomLog /var/log/apache2/misp.local_access.log combined
+    ServerSignature Off
 </VirtualHost>
 EOF
 # cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
@@ -228,15 +228,15 @@ sudo a2dissite default-ssl
 sudo a2ensite misp-ssl
 
 
-echo -e "\n--- Restarting Apache ---\n"
+echo "\n--- Restarting Apache ---\n"
 sudo systemctl restart apache2 > /dev/null 2>&1
 
 
-echo -e "\n--- Configuring log rotation ---\n"
+echo "\n--- Configuring log rotation ---\n"
 sudo cp $PATH_TO_MISP/INSTALL/misp.logrotate /etc/logrotate.d/misp
 
 
-echo -e "\n--- MISP configuration ---\n"
+echo "\n--- MISP configuration ---\n"
 # There are 4 sample configuration files in /var/www/MISP/app/Config that need to be copied
 sudo -u www-data cp -a $PATH_TO_MISP/app/Config/bootstrap.default.php /var/www/MISP/app/Config/bootstrap.php
 sudo -u www-data cp -a $PATH_TO_MISP/app/Config/database.default.php /var/www/MISP/app/Config/database.php
@@ -268,7 +268,7 @@ sudo $PATH_TO_MISP/app/Console/cake Baseurl $MISP_BASEURL
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 
-echo -e "\n--- Generating a GPG encryption key... ---\n"
+echo "\n--- Generating a GPG encryption key... ---\n"
 sudo apt-get install -y rng-tools haveged
 sudo -u www-data mkdir $PATH_TO_MISP/.gnupg
 sudo chmod 700 $PATH_TO_MISP/.gnupg
@@ -292,7 +292,7 @@ rm gen-key-script
 sudo -u www-data gpg --homedir $PATH_TO_MISP/.gnupg --batch --gen-key gen-key-scriptgpg --homedir $PATH_TO_MISP/.gnupg --export --armor $EMAIL_ADDRESS > $PATH_TO_MISP/app/webroot/gpg.asc
 
 
-echo -e "\n--- Making the background workers start on boot... ---\n"
+echo "\n--- Making the background workers start on boot... ---\n"
 sudo chmod 755 $PATH_TO_MISP/app/Console/worker/start.sh
 # With systemd:
 # sudo cat > /etc/systemd/system/workers.service  <<EOF
@@ -320,7 +320,7 @@ fi
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 
 
-# echo -e "\n--- Installing MISP modules... ---\n"
+# echo "\n--- Installing MISP modules... ---\n"
 # sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev > /dev/null 2>&1
 # cd /usr/local/src/
 # sudo git clone https://github.com/MISP/misp-modules.git
@@ -343,21 +343,21 @@ sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start
 # sudo systemctl restart misp-modules.service > /dev/null
 
 
-echo -e "\n--- Restarting Apache... ---\n"
+echo "\n--- Restarting Apache... ---\n"
 sudo systemctl restart apache2 > /dev/null 2>&1
 sleep 5
 
-echo -e "\n--- Updating the galaxies... ---\n"
+echo "\n--- Updating the galaxies... ---\n"
 sudo -E $PATH_TO_MISP/app/Console/cake userInit -q > /dev/null
 AUTH_KEY=$(mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP misp -e "SELECT authkey FROM users;" | tail -1)
 curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v http://127.0.0.1/galaxies/update > /dev/null 2>&1
 
 
-echo -e "\n--- Updating the taxonomies... ---\n"
+echo "\n--- Updating the taxonomies... ---\n"
 curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v http://127.0.0.1/taxonomies/update > /dev/null 2>&1
 
 
-# echo -e "\n--- Enabling MISP new pub/sub feature (ZeroMQ)... ---\n"
+# echo "\n--- Enabling MISP new pub/sub feature (ZeroMQ)... ---\n"
 # # ZeroMQ depends on the Python client for Redis
 # pip install redis > /dev/null 2>&1
 # ## Install ZeroMQ and prerequisites
@@ -385,9 +385,9 @@ curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v h
 # pip install pyzmq > /dev/null 2>&1
 
 
-echo -e "\e[32mMISP is ready\e[0m"
-echo -e "Login and passwords for the MISP image are the following:"
-echo -e "Web interface (default network settings): $MISP_BASEURL"
-echo -e "MISP admin:  admin@admin.test/admin"
-echo -e "Shell/SSH: packer/packer"
-echo -e "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"
+echo "\e[32mMISP is ready\e[0m"
+echo "Login and passwords for the MISP image are the following:"
+echo "Web interface (default network settings): $MISP_BASEURL"
+echo "MISP admin:  admin@admin.test/admin"
+echo "Shell/SSH: misp/Password1234"
+echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"

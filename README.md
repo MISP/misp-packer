@@ -16,7 +16,9 @@ Launch the generation with the VirtualBox builder:
     $ packer build -only=virtualbox-iso misp.json
 
 A VirtualBox image will be generated and stored in the folder
-*output-virtualbox-iso*. You can directly import it in VirtualBox.
+*output-virtualbox-iso*. Default credentials are displayed (Web interface, SSH
+and MariaDB) at the end of the process. You can directly import the image in
+VirtualBox.
 
 If you want to build an image for VMWare you will need to install it and to
 use the VMWare builder with the command:
@@ -36,3 +38,6 @@ You can also launch all builders in parallel.
     $ GITHUB_AUTH_TOKEN=<your-github-auth-token>
     $ TAG=$(curl https://api.github.com/repos/MISP/MISP/releases/latest | jq  -r '.tag_name')
     $ ./upload.sh github_api_token=$GITHUB_AUTH_TOKEN owner=MISP repo=MISP tag=$TAG filename=./output-virtualbox-iso/MISP_demo.ova
+
+You can add these lines in the *post-processors* section of the file
+*misp.json* if you want to automate the process.

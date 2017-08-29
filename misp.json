@@ -1,7 +1,7 @@
 {
     "variables": {
-        "ssh_name": "packer",
-        "ssh_pass": "packer",
+        "ssh_name": "misp",
+        "ssh_pass": "Password1234",
         "hostname": "packer",
         "vm_name": "MISP_demo",
         "disk_size": "10000"
@@ -96,5 +96,10 @@
         "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
         "script": "scripts/bootstrap.sh",
         "pause_before": "10s"
+    }],
+
+    "post-processors":[{
+        "type": "checksum",
+        "checksum_types": ["sha1", "sha512"]
     }]
 }

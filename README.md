@@ -16,9 +16,14 @@ Launch the generation with the VirtualBox builder:
     $ packer build -only=virtualbox-iso misp.json
 
 A VirtualBox image will be generated and stored in the folder
-*output-virtualbox-iso*. Default credentials are displayed (Web interface, SSH
-and MariaDB) at the end of the process. You can directly import the image in
-VirtualBox.
+*output-virtualbox-iso*.
+
+Default credentials are displayed (Web interface, SSH and MariaDB) at the end
+of the process. You can directly import the image in VirtualBox.
+
+The sha1 and sha512 checksums of the generated VM will be stored in the files
+*packer_virtualbox-iso_virtualbox-iso_sha1.checksum* and
+*packer_virtualbox-iso_virtualbox-iso_sha512.checksum* respectively.
 
 If you want to build an image for VMWare you will need to install it and to
 use the VMWare builder with the command:

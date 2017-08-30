@@ -3,7 +3,7 @@
 ## Requirements
 
 * [VirtualBox](https://www.virtualbox.org)
-* [Packer](https://www.packer.io)
+* [Packer](https://www.packer.io) from the Packer website
 
 ## Usage
 

@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+MISP_BRANCH='2.4'
+
 # Database configuration
 DBHOST='localhost'
 DBNAME='misp'
@@ -103,7 +105,7 @@ echo "--- Retrieving MISP ---"
 mkdir $PATH_TO_MISP
 sudo chown www-data:www-data $PATH_TO_MISP
 cd $PATH_TO_MISP
-sudo -u www-data git clone https://github.com/MISP/MISP.git $PATH_TO_MISP
+sudo -u www-data git clone -b $MISP_BRANCH https://github.com/MISP/MISP.git $PATH_TO_MISP
 #git checkout tags/$(git describe --tags `git rev-list --tags --max-count=1`)
 sudo -u www-data git config core.filemode false
 # chown -R www-data $PATH_TO_MISP

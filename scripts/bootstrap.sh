@@ -12,7 +12,7 @@ DBPASSWORD_MISP="$(openssl rand -hex 32)"
 
 # Webserver configuration
 PATH_TO_MISP='/var/www/MISP'
-MISP_BASEURL='http://127.0.0.1'
+MISP_BASEURL='http://'
 MISP_LIVE='1'
 FQDN='localhost'
 
@@ -31,6 +31,12 @@ GPG_EMAIL_ADDRESS='info@localhost'
 GPG_KEY_LENGTH='2048'
 GPG_PASSPHRASE=''
 
+# php.ini configuration
+upload_max_filesize=50M
+post_max_size=50M
+max_execution_time=300
+memory_limit=512M
+PHP_INI=/etc/php/7.0/apache2/php.ini
 
 
 
@@ -96,6 +102,11 @@ sudo a2ensite default-ssl > /dev/null 2>&1
 echo "--- Installing PHP-specific packages ---"
 sudo apt-get install -y libapache2-mod-php php php-cli php-crypt-gpg php-dev php-json php-mysql php-opcache php-readline php-redis php-xml > /dev/null 2>&1
 
+echo "--- Configuring PHP ---"
+for key in upload_max_filesize post_max_size max_execution_time max_input_time memory_limit
+do
+ sudo sed -i "s/^\($key\).*/\1 = $(eval echo \${$key})/" $PHP_INI
+done
 
 echo "--- Restarting Apache ---"
 sudo systemctl restart apache2 > /dev/null 2>&1
@@ -266,7 +277,7 @@ EOF
 sudo chown -R www-data:www-data $PATH_TO_MISP/app/Config
 sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
-sudo $PATH_TO_MISP/app/Console/cake Baseurl $MISP_BASEURL
+sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 
@@ -323,12 +334,15 @@ sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start
 
 
 echo "--- Installing MISP modules... ---"
-sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev > /dev/null 2>&1
+sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
+sudo pip install pymisp python-magic > /dev/null 2>&1
+sudo pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
+sudo pip install https://github.com/lief-project/packages/raw/lief-master-latest/pylief-0.7.0.dev.zip
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]

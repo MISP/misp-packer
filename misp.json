@@ -9,6 +9,7 @@
 
     "builders": [{
         "type": "virtualbox-iso",
+        "headless": "true",
         "guest_os_type": "Ubuntu_64",
         "format": "ova",
         "vm_name": "{{user `vm_name`}}",
@@ -48,6 +49,7 @@
     },
     {
         "type": "vmware-iso",
+        "headless": "true",
         "guest_os_type": "ubuntu-64",
         "vm_name": "{{user `vm_name`}}",
 
@@ -100,6 +102,6 @@
 
     "post-processors":[{
         "type": "checksum",
-        "checksum_types": ["sha1", "sha512"]
+        "checksum_types": ["sha1", "sha256", "sha384", "sha512"]
     }]
 }

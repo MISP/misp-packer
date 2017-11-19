@@ -342,7 +342,7 @@ sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
 sudo pip install pymisp python-magic > /dev/null 2>&1
 sudo pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
-sudo pip install https://github.com/lief-project/packages/raw/lief-master-latest/pylief-0.7.0.dev.zip
+sudo pip3 install lief
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]

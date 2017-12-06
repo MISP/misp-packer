@@ -59,6 +59,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
     rsync -azv --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
     ssh ${REL_USER}@${REL_SERVER} rm export/latest
     ssh ${REL_USER}@${REL_SERVER} ln -s MISP_${VER}@${LATEST_COMMIT} export/latest
+    ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
   done
 
   # Remove files for next run
@@ -70,6 +71,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   rm packer_virtualbox-iso_virtualbox-iso_sha256.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
+  rm MISP_${VER}@${LATEST_COMMIT}-vmware.zip.asc
   echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
 else
   echo "Current MISP version ${VER}@${LATEST_COMMIT} is up to date."

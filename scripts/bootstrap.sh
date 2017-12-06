@@ -277,7 +277,8 @@ EOF
 sudo chown -R www-data:www-data $PATH_TO_MISP/app/Config
 sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
-sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
+##sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
+sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 

@@ -50,5 +50,10 @@ You can also launch all builders in parallel.
     $ TAG=$(curl https://api.github.com/repos/MISP/MISP/releases/latest | jq  -r '.tag_name')
     $ ./upload.sh github_api_token=$GITHUB_AUTH_TOKEN owner=MISP repo=MISP tag=$TAG filename=./output-virtualbox-iso/MISP_demo.ova
 
+## Upload latest release
+
+curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name'
+
+
 You can add these lines in the *post-processors* section of the file
 *misp.json* if you want to automate the process.

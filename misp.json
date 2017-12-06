@@ -20,8 +20,8 @@
 
         "disk_size": "{{user `disk_size`}}",
 
-        "iso_url": "http://releases.ubuntu.com/17.04/ubuntu-17.04-server-amd64.iso",
-        "iso_checksum": "ca5d9a8438e2434b9a3ac2be67b5c5fa2c1f8e3e40b954519462935195464034",
+        "iso_url": "http://releases.ubuntu.com/17.10/ubuntu-17.10-server-amd64.iso",
+        "iso_checksum": "af913c00296eb0cfece99b8a02ae6db035ae173ed240241e780c8d7db96914b1",
         "iso_checksum_type": "sha256",
 
         "http_directory" : "preseeds",
@@ -55,8 +55,8 @@
 
         "disk_size": "{{user `disk_size`}}",
 
-        "iso_url": "http://releases.ubuntu.com/17.04/ubuntu-17.04-server-amd64.iso",
-        "iso_checksum": "ca5d9a8438e2434b9a3ac2be67b5c5fa2c1f8e3e40b954519462935195464034",
+        "iso_url": "http://releases.ubuntu.com/17.10/ubuntu-17.10-server-amd64.iso",
+        "iso_checksum": "af913c00296eb0cfece99b8a02ae6db035ae173ed240241e780c8d7db96914b1",
         "iso_checksum_type": "sha256",
 
         "http_directory" : "preseeds",

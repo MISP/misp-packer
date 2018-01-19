@@ -51,7 +51,7 @@ DBPASSWORD_MISP="$(openssl rand -hex 32)"
 
 # Webserver configuration
 PATH_TO_MISP='/var/www/MISP'
-MISP_BASEURL='http://'
+MISP_BASEURL=''
 MISP_LIVE='1'
 FQDN='localhost'
 
@@ -333,7 +333,7 @@ sudo chown -R www-data:www-data $PATH_TO_MISP/app/Config
 sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
 ##sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
-sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://
+##sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 

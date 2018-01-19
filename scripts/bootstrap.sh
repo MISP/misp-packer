@@ -1,10 +1,45 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+
+## Source of the vercomp function: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+vercomp () {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
+}
 
 MISP_BRANCH='2.4'
 
 # Grub config (reverts network interface names to ethX)
 GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"
 DEFAULT_GRUB=/etc/default/grub
+
+# Ubuntu version
+UBUNTU_VERSION="$(lsb_release -r -s)"
 
 # Database configuration
 DBHOST='localhost'
@@ -40,7 +75,13 @@ upload_max_filesize=50M
 post_max_size=50M
 max_execution_time=300
 memory_limit=512M
-PHP_INI=/etc/php/7.0/apache2/php.ini
+## Starting Ubuntu 18.04 php71 is default
+vercomp 18.04 ${UBUNTU_VERSION}
+case $? in
+    0) op='=';PHP_INI=/etc/php/7.1/apache2/php.ini;;
+    1) op='>';PHP_INI=/etc/php/7.1/apache2/php.ini;;
+    2) op='<';PHP_INI=/etc/php/7.0/apache2/php.ini;;
+esac
 
 
 
@@ -77,6 +118,7 @@ sudo apt-get install -y mariadb-client mariadb-server > /dev/null 2>&1
 # Secure the MariaDB installation (especially by setting a strong root password)
 sleep 7 # give some time to the DB to launch…
 sudo apt-get install -y expect > /dev/null 2>&1
+## do we need to spawn mysql_secure_install with sudo in future?
 expect -f - <<-EOF
   set timeout 10
   spawn mysql_secure_installation
@@ -124,7 +166,8 @@ sudo systemctl restart apache2 > /dev/null 2>&1
 
 
 echo "--- Retrieving MISP ---"
-mkdir $PATH_TO_MISP
+## Double check perms.
+sudo mkdir $PATH_TO_MISP
 sudo chown www-data:www-data $PATH_TO_MISP
 cd $PATH_TO_MISP
 sudo -u www-data git clone -b $MISP_BRANCH https://github.com/MISP/MISP.git $PATH_TO_MISP
@@ -184,7 +227,7 @@ sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant usage on *.* to $DBNAM
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant all privileges on $DBNAME.* to '$DBUSER_MISP'@'localhost';"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "flush privileges;"
 # Import the empty MISP database from MYSQL.sql
-sudo -u www-data mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME < /var/www/MISP/INSTALL/MYSQL.sql
+sudo -u www-data cat /var/www/MISP/INSTALL/MYSQL.sql |mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME
 
 
 echo "--- Configuring Apache… ---"
@@ -195,6 +238,7 @@ sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST
 
 
 echo "--- Add a VirtualHost for MISP ---"
+## Again double check this perm madness ;)
 sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
 <VirtualHost *:80>
     ServerAdmin admin@misp.local
@@ -352,9 +396,12 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
+sudo pip3 install lief 2>&1
+sudo pip3 install pymisp python-magic > /dev/null 2>&1
+sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 sudo pip install pymisp python-magic > /dev/null 2>&1
 sudo pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
-sudo pip3 install lief
+sudo pip install lief 2>&1
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]

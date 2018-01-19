@@ -4,6 +4,7 @@
 
 * [VirtualBox](https://www.virtualbox.org)
 * [Packer](https://www.packer.io) from the Packer website
+* *tree* -> sudo apt install tree (on deployment side)
 
 ## Usage
 

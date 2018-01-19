@@ -62,6 +62,8 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
     ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
   done
 
+  ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "MISP VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+
   # Remove files for next run
   rm -r output-virtualbox-iso
   rm -r output-vmware-iso

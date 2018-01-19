@@ -2,6 +2,10 @@
 
 MISP_BRANCH='2.4'
 
+# Grub config (reverts network interface names to ethX)
+GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"
+DEFAULT_GRUB=/etc/default/grub
+
 # Database configuration
 DBHOST='localhost'
 DBNAME='misp'
@@ -40,8 +44,15 @@ PHP_INI=/etc/php/7.0/apache2/php.ini
 
 
 
-echo "--- Installing MISP... ---"
+echo "--- Installing MISP… ---"
 
+echo "--- Configuring GRUB ---"
+
+for key in GRUB_CMDLINE_LINUX
+do
+    sudo sed -i "s/^\($key\)=.*/\1=\"$(eval echo \${$key})\"/" $DEFAULT_GRUB
+done
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "--- Updating packages list ---"
 sudo apt-get -qq update
@@ -64,7 +75,7 @@ sudo apt-get install -y postfix > /dev/null 2>&1
 echo "--- Installing MariaDB specific packages and settings ---"
 sudo apt-get install -y mariadb-client mariadb-server > /dev/null 2>&1
 # Secure the MariaDB installation (especially by setting a strong root password)
-sleep 7 # give some time to the DB to launch...
+sleep 7 # give some time to the DB to launch…
 sudo apt-get install -y expect > /dev/null 2>&1
 expect -f - <<-EOF
   set timeout 10
@@ -143,7 +154,7 @@ sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
 
 
-echo "--- Retrieving CakePHP... ---"
+echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
 cd $PATH_TO_MISP
 sudo -u www-data git submodule init
@@ -159,7 +170,7 @@ sudo phpenmod redis
 sudo -u www-data cp -fa $PATH_TO_MISP/INSTALL/setup/config.php $PATH_TO_MISP/app/Plugin/CakeResque/Config/config.php
 
 
-echo "--- Setting the permissions... ---"
+echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP
 sudo chmod -R 750 $PATH_TO_MISP
 sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
@@ -167,7 +178,7 @@ sudo chmod -R g+ws $PATH_TO_MISP/app/files
 sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 
 
-echo "--- Creating a database user... ---"
+echo "--- Creating a database user… ---"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "create database $DBNAME;"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant usage on *.* to $DBNAME@localhost identified by '$DBPASSWORD_MISP';"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant all privileges on $DBNAME.* to '$DBUSER_MISP'@'localhost';"
@@ -176,7 +187,7 @@ sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "flush privileges;"
 sudo -u www-data mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME < /var/www/MISP/INSTALL/MYSQL.sql
 
 
-echo "--- Configuring Apache... ---"
+echo "--- Configuring Apache… ---"
 # !!! apache.24.misp.ssl seems to be missing
 #cp $PATH_TO_MISP/INSTALL/apache.24.misp.ssl /etc/apache2/sites-available/misp-ssl.conf
 # If a valid SSL certificate is not already created for the server, create a self-signed certificate:
@@ -282,7 +293,7 @@ sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 
-echo "--- Generating a GPG encryption key... ---"
+echo "--- Generating a GPG encryption key… ---"
 sudo apt-get install -y rng-tools haveged
 sudo -u www-data mkdir $PATH_TO_MISP/.gnupg
 sudo chmod 700 $PATH_TO_MISP/.gnupg
@@ -306,7 +317,7 @@ rm gen-key-script
 sudo -u www-data gpg --homedir $PATH_TO_MISP/.gnupg --batch --gen-key gen-key-scriptgpg --homedir $PATH_TO_MISP/.gnupg --export --armor $EMAIL_ADDRESS > $PATH_TO_MISP/app/webroot/gpg.asc
 
 
-echo "--- Making the background workers start on boot... ---"
+echo "--- Making the background workers start on boot… ---"
 sudo chmod 755 $PATH_TO_MISP/app/Console/worker/start.sh
 # With systemd:
 # sudo cat > /etc/systemd/system/workers.service  <<EOF
@@ -334,7 +345,7 @@ fi
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 
 
-echo "--- Installing MISP modules... ---"
+echo "--- Installing MISP modules… ---"
 sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
@@ -365,21 +376,21 @@ sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.loc
 
 
 
-echo "--- Restarting Apache... ---"
+echo "--- Restarting Apache… ---"
 sudo systemctl restart apache2 > /dev/null 2>&1
 sleep 5
 
-echo "--- Updating the galaxies... ---"
+echo "--- Updating the galaxies… ---"
 sudo -E $PATH_TO_MISP/app/Console/cake userInit -q > /dev/null
 AUTH_KEY=$(mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP misp -e "SELECT authkey FROM users;" | tail -1)
 curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v http://127.0.0.1/galaxies/update > /dev/null 2>&1
 
 
-echo "--- Updating the taxonomies... ---"
+echo "--- Updating the taxonomies… ---"
 curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v http://127.0.0.1/taxonomies/update > /dev/null 2>&1
 
 
-# echo "--- Enabling MISP new pub/sub feature (ZeroMQ)... ---"
+# echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
 # # ZeroMQ depends on the Python client for Redis
 # pip install redis > /dev/null 2>&1
 # ## Install ZeroMQ and prerequisites

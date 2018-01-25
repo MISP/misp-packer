@@ -1,36 +1,36 @@
 #!/usr/bin/env bash
 
 ## Source of the vercomp function: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
-vercomp () {
-    if [[ $1 == $2 ]]
-    then
-        return 0
-    fi
-    local IFS=.
-    local i ver1=($1) ver2=($2)
-    # fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-    do
-        ver1[i]=0
-    done
-    for ((i=0; i<${#ver1[@]}; i++))
-    do
-        if [[ -z ${ver2[i]} ]]
-        then
-            # fill empty fields in ver2 with zeros
-            ver2[i]=0
-        fi
-        if ((10#${ver1[i]} > 10#${ver2[i]}))
-        then
-            return 1
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]}))
-        then
-            return 2
-        fi
-    done
-    return 0
-}
+# vercomp () {
+#     if [[ $1 == $2 ]]
+#     then
+#         return 0
+#     fi
+#     local IFS=.
+#     local i ver1=($1) ver2=($2)
+#     # fill empty fields in ver1 with zeros
+#     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+#     do
+#         ver1[i]=0
+#     done
+#     for ((i=0; i<${#ver1[@]}; i++))
+#     do
+#         if [[ -z ${ver2[i]} ]]
+#         then
+#             # fill empty fields in ver2 with zeros
+#             ver2[i]=0
+#         fi
+#         if ((10#${ver1[i]} > 10#${ver2[i]}))
+#         then
+#             return 1
+#         fi
+#         if ((10#${ver1[i]} < 10#${ver2[i]}))
+#         then
+#             return 2
+#         fi
+#     done
+#     return 0
+# }
 
 MISP_BRANCH='2.4'
 
@@ -75,13 +75,14 @@ upload_max_filesize=50M
 post_max_size=50M
 max_execution_time=300
 memory_limit=512M
+PHP_INI=/etc/php/7.0/apache2/php.ini
 ## Starting Ubuntu 18.04 php71 is default
-vercomp 18.04 ${UBUNTU_VERSION}
-case $? in
-    0) op='=';PHP_INI=/etc/php/7.1/apache2/php.ini;;
-    1) op='>';PHP_INI=/etc/php/7.1/apache2/php.ini;;
-    2) op='<';PHP_INI=/etc/php/7.0/apache2/php.ini;;
-esac
+# vercomp 18.04 ${UBUNTU_VERSION}
+# case $? in
+#     0) op='=';PHP_INI=/etc/php/7.1/apache2/php.ini;;
+#     1) op='>';PHP_INI=/etc/php/7.1/apache2/php.ini;;
+#     2) op='<';PHP_INI=/etc/php/7.0/apache2/php.ini;;
+# esac
 
 
 
@@ -229,7 +230,7 @@ sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant usage on *.* to $DBNAM
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "grant all privileges on $DBNAME.* to '$DBUSER_MISP'@'localhost';"
 sudo mysql -u $DBUSER_ADMIN -p$DBPASSWORD_ADMIN -e "flush privileges;"
 # Import the empty MISP database from MYSQL.sql
-sudo -u www-data cat /var/www/MISP/INSTALL/MYSQL.sql |mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME
+sudo -u www-data cat /var/www/MISP/INSTALL/MYSQL.sql | mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP $DBNAME
 
 
 echo "--- Configuring Apache… ---"

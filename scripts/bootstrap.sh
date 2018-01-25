@@ -64,7 +64,9 @@ sudo apt-get install -y postfix > /dev/null 2>&1
 echo "--- Installing MariaDB specific packages and settings ---"
 sudo apt-get install -y mariadb-client mariadb-server > /dev/null 2>&1
 # Secure the MariaDB installation (especially by setting a strong root password)
-sleep 7 # give some time to the DB to launch...
+sleep 10 # give some time to the DB to launch...
+sudo systemctl restart mariadb.service
+sleep 10
 sudo apt-get install -y expect > /dev/null 2>&1
 expect -f - <<-EOF
   set timeout 10

@@ -88,13 +88,13 @@ PHP_INI=/etc/php/7.0/apache2/php.ini
 
 echo "--- Installing MISP… ---"
 
-echo "--- Configuring GRUB ---"
-
-for key in GRUB_CMDLINE_LINUX
-do
-    sudo sed -i "s/^\($key\)=.*/\1=\"$(eval echo \${$key})\"/" $DEFAULT_GRUB
-done
-sudo grub-mkconfig -o /boot/grub/grub.cfg
+# echo "--- Configuring GRUB ---"
+#
+# for key in GRUB_CMDLINE_LINUX
+# do
+#     sudo sed -i "s/^\($key\)=.*/\1=\"$(eval echo \${$key})\"/" $DEFAULT_GRUB
+# done
+# sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "--- Updating packages list ---"
 sudo apt-get -qq update

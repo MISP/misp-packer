@@ -198,7 +198,8 @@ sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git
 cd $PATH_TO_MISP/app/files/scripts/mixbox
 sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
-
+# install STIX2.0 library to support STIX 2.0 export:
+sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:

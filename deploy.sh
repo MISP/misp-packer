@@ -13,6 +13,12 @@ SHA_SUMS="1 256 384 512"
 REL_USER="misp-release"
 REL_SERVER="cpab"
 
+# Enable logging for packer
+PACKER_LOG=1
+
+# Make sure we have a current work directory
+PWD=`pwd`
+
 # Place holder, this fn() should be used to anything signing related
 function signify()
 {
@@ -32,10 +38,12 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   cat misp.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"MISP_${VER}@${LATEST_COMMIT}\",|" > misp-deploy.json
 
   # Build vmware VM set
-  /usr/local/bin/packer build -only=vmware-iso misp-deploy.json
+  PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
+  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json
 
   # Build virtualbox VM set
-  /usr/local/bin/packer build -only=virtualbox-iso misp-deploy.json
+  PACKER_LOG_PATH="${PWD}/packerlogi-vbox.txt"
+  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json
 
   # ZIPup all the vmware stuff
   zip -r MISP_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso

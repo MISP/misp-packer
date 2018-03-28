@@ -105,7 +105,7 @@ sudo apt-get -qq update
 
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo vim zip > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim zip > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -212,6 +212,7 @@ sudo chown www-data:www-data misp-dashboard
 sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
 cd misp-dashboard
 sudo /var/www/misp-dashboard/install_dependencies.sh
+sudo sed -i '1s/^/cd \/var\/www\/misp-dashboard\n/' /var/www/misp-dashboard/run.sh
 
 echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
@@ -401,7 +402,8 @@ then
     sudo chmod u+x /etc/rc.local
 fi
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
-
+sudo sed -i -e '$i \sudo -u www-data /usr/bin/redis-server --port 6250 2> /dev/null > /dev/null &\n' /etc/rc.local
+sudo sed -i -e '$i \/usr/bin/tmux new-session -s misp-dashboard -d /var/www/misp-dashboard/run.sh \\; set -t misp-dashboard remain-on-exit on\n' /etc/rc.local
 
 echo "--- Installing MISP modules… ---"
 sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1

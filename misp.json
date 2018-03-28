@@ -3,8 +3,10 @@
         "ssh_name": "misp",
         "ssh_pass": "Password1234",
         "hostname": "misp",
+        "vm_version": "2.4",
+        "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
         "vm_name": "MISP_demo",
-        "disk_size": "10000"
+        "disk_size": "25000"
     },
 
     "builders": [{
@@ -14,7 +16,20 @@
         "format": "ova",
         "vm_name": "{{user `vm_name`}}",
 
+    "export_opts":
+        [
+            "--manifest",
+            "--vsys", "0",
+            "--eulafile", "/tmp/LICENSE",
+            "--description", "{{user `vm_description`}}",
+            "--version", "{{user `vm_version`}}"
+        ],
+
         "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "2048"],
+            ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,,2222,,22" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "http,tcp,,8080,,80" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "dashboard,tcp,,8001,127.0.0.1,8001" ],
             ["modifyvm", "{{.Name}}", "--vram", "32"]
         ],
 
@@ -69,6 +84,10 @@
         "ssh_pty" : "true",
 
         "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+
+        "vmx_data": {
+            "memsize": "2048"
+        },
 
         "boot_command" : [
             "<esc><esc><enter><wait>",

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Timing creation
+TIME_START=$(date +%s)
+
 # Latest version of misp
 VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
@@ -18,6 +21,9 @@ PACKER_LOG=1
 
 # Make sure we have a current work directory
 PWD=`pwd`
+
+# Fetching latest MISP LICENSE
+/usr/bin/wget -q -O /tmp/LICENSE https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
 # Place holder, this fn() should be used to anything signing related
 function signify()
@@ -63,8 +69,8 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   # Sign and transfer files
   for FILE in ${FILE_LIST}; do
     gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
-    rsync -azv --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
-    rsync -azv --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
+    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
+    rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
     ssh ${REL_USER}@${REL_SERVER} rm export/latest
     ssh ${REL_USER}@${REL_SERVER} ln -s MISP_${VER}@${LATEST_COMMIT} export/latest
     ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
@@ -83,6 +89,10 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
   rm MISP_${VER}@${LATEST_COMMIT}-vmware.zip.asc
   echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
+  TIME_END=$(date +%s)
+  TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
+
+  echo "The generation took ${TIME_DELTA} seconds"
 else
   echo "Current MISP version ${VER}@${LATEST_COMMIT} is up to date."
 fi

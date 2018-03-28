@@ -1,36 +1,36 @@
 #!/usr/bin/env bash
 
 ## Source of the vercomp function: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
-# vercomp () {
-#     if [[ $1 == $2 ]]
-#     then
-#         return 0
-#     fi
-#     local IFS=.
-#     local i ver1=($1) ver2=($2)
-#     # fill empty fields in ver1 with zeros
-#     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-#     do
-#         ver1[i]=0
-#     done
-#     for ((i=0; i<${#ver1[@]}; i++))
-#     do
-#         if [[ -z ${ver2[i]} ]]
-#         then
-#             # fill empty fields in ver2 with zeros
-#             ver2[i]=0
-#         fi
-#         if ((10#${ver1[i]} > 10#${ver2[i]}))
-#         then
-#             return 1
-#         fi
-#         if ((10#${ver1[i]} < 10#${ver2[i]}))
-#         then
-#             return 2
-#         fi
-#     done
-#     return 0
-# }
+##vercomp () {
+##    if [[ $1 == $2 ]]
+##    then
+##        return 0
+##    fi
+##    local IFS=.
+##    local i ver1=($1) ver2=($2)
+##    # fill empty fields in ver1 with zeros
+##    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+##    do
+##        ver1[i]=0
+##    done
+##    for ((i=0; i<${#ver1[@]}; i++))
+##    do
+##        if [[ -z ${ver2[i]} ]]
+##        then
+##            # fill empty fields in ver2 with zeros
+##            ver2[i]=0
+##        fi
+##        if ((10#${ver1[i]} > 10#${ver2[i]}))
+##        then
+##            return 1
+##        fi
+##        if ((10#${ver1[i]} < 10#${ver2[i]}))
+##        then
+##            return 2
+##        fi
+##    done
+##    return 0
+##}
 
 MISP_BRANCH='2.4'
 
@@ -55,6 +55,9 @@ MISP_BASEURL=''
 MISP_LIVE='1'
 FQDN='localhost'
 
+# Timing creation
+TIME_START=$(date +%s)
+
 # OpenSSL configuration
 OPENSSL_C='LU'
 OPENSSL_ST='State'
@@ -77,12 +80,13 @@ max_execution_time=300
 memory_limit=512M
 PHP_INI=/etc/php/7.1/apache2/php.ini
 ## Starting Ubuntu 18.04 php71 is default
-# vercomp 18.04 ${UBUNTU_VERSION}
-# case $? in
-#     0) op='=';PHP_INI=/etc/php/7.1/apache2/php.ini;;
-#     1) op='>';PHP_INI=/etc/php/7.1/apache2/php.ini;;
-#     2) op='<';PHP_INI=/etc/php/7.0/apache2/php.ini;;
-# esac
+##vercomp 18.04 ${UBUNTU_VERSION}
+##case $? in
+##    0) op='=';PHP_INI='/etc/php/7.1/apache2/php.ini';;
+##    1) op='>';PHP_INI='/etc/php/7.1/apache2/php.ini';;
+##    2) op='<';PHP_INI='/etc/php/7.0/apache2/php.ini';;
+##esac
+PHP_INI='/etc/php/7.1/apache2/php.ini'
 
 
 
@@ -200,6 +204,14 @@ sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
 sudo pip3 install stix2 > /dev/null 2>&1
+
+echo "--- Installing misp-dashboard ---"
+cd /var/www
+sudo mkdir misp-dashboard
+sudo chown www-data:www-data misp-dashboard
+sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
+cd misp-dashboard
+sudo /var/www/misp-dashboard/install_dependencies.sh
 
 echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
@@ -336,8 +348,6 @@ EOF
 sudo chown -R www-data:www-data $PATH_TO_MISP/app/Config
 sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
-##sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
-##sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
 
@@ -440,6 +450,8 @@ curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v h
 echo "--- Updating the taxonomies… ---"
 curl -k -X POST -H "Authorization: $AUTH_KEY" -H "Accept: application/json" -v http://127.0.0.1/taxonomies/update > /dev/null 2>&1
 
+echo "--- Setting Baseurl ---"
+sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 
 # echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
 # # ZeroMQ depends on the Python client for Redis
@@ -475,3 +487,9 @@ echo "Web interface (default network settings): $MISP_BASEURL"
 echo "MISP admin:  admin@admin.test/admin"
 echo "Shell/SSH: misp/Password1234"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"
+
+
+TIME_END=$(date +%s)
+TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
+
+echo "The generation took ${TIME_DELTA} seconds"

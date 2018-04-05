@@ -103,6 +103,9 @@ echo "--- Installing MISP… ---"
 echo "--- Updating packages list ---"
 sudo apt-get -qq update
 
+echo "--- Upgrading and autoremoving packages ---"
+sudo apt-get -y upgrade
+sudo apt-get -y autoremove
 
 echo "--- Install base packages ---"
 sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim zip > /dev/null 2>&1
@@ -209,10 +212,10 @@ echo "--- Installing misp-dashboard ---"
 cd /var/www
 sudo mkdir misp-dashboard
 sudo chown www-data:www-data misp-dashboard
-sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
+sudo -u www-data git clone https://github.com/SteveClement/misp-dashboard.git
 cd misp-dashboard
 sudo /var/www/misp-dashboard/install_dependencies.sh
-sudo sed -i '1s/^/cd \/var\/www\/misp-dashboard\n/' /var/www/misp-dashboard/run.sh
+sudo sed -i "s/^host\ =\ localhost/host\ =\ 0.0.0.0/g" /var/www/misp-dashboard/config/config.cfg
 
 echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
@@ -351,6 +354,14 @@ sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_event_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_object_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_object_reference_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_attribute_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_sighting_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_user_notifications_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_organisation_notifications_enable" true
 
 echo "--- Generating a GPG encryption key… ---"
 sudo apt-get install -y rng-tools haveged
@@ -401,9 +412,15 @@ then
     echo 'exit 0' | sudo tee -a /etc/rc.local
     sudo chmod u+x /etc/rc.local
 fi
+
+
+# redis-server requires the following /sys/kernel tweak
+sudo sed -i -e '$i \echo never > /sys/kernel/mm/transparent_hugepage/enabled\n' /etc/rc.local
+sudo sed -i -e '$i \echo 1024 > /proc/sys/net/core/somaxconn\n' /etc/rc.local
+sudo sed -i -e '$i \sysctl vm.overcommit_memory=1\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
-sudo sed -i -e '$i \sudo -u www-data /usr/bin/redis-server --port 6250 2> /dev/null > /dev/null &\n' /etc/rc.local
-sudo sed -i -e '$i \/usr/bin/tmux new-session -s misp-dashboard -d /var/www/misp-dashboard/run.sh \\; set -t misp-dashboard remain-on-exit on\n' /etc/rc.local
+sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
+sudo sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
 
 echo "--- Installing MISP modules… ---"
 sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
@@ -435,7 +452,7 @@ sudo pip install lief 2>&1
 # sudo systemctl restart misp-modules.service > /dev/null
 
 # With initd:
-sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
+# sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
 
 
 
@@ -461,33 +478,8 @@ curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --h
 echo "--- Setting Baseurl ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 
-# echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
-# # ZeroMQ depends on the Python client for Redis
-# pip install redis > /dev/null 2>&1
-# ## Install ZeroMQ and prerequisites
-# apt-get install -y pkg-config > /dev/null 2>&1
-# cd /usr/local/src/
-# git clone git://github.com/jedisct1/libsodium.git > /dev/null 2>&1
-# cd libsodium
-# /autogen.sh > /dev/null 2>&1
-# ./configure > /dev/null 2>&1
-# make check > /dev/null 2>&1
-# make > /dev/null 2>&1
-# make install > /dev/null 2>&1
-# ldconfig > /dev/null 2>&1
-# cd /usr/local/src/
-# wget https://archive.org/download/zeromq_4.1.5/zeromq-4.1.5.tar.gz > /dev/null 2>&1
-# tar -xvf zeromq-4.1.5.tar.gz > /dev/null 2>&1
-# cd zeromq-4.1.5/
-# ./autogen.sh > /dev/null 2>&1
-# ./configure > /dev/null 2>&1
-# make check > /dev/null 2>&1
-# make > /dev/null 2>&1
-# make install > /dev/null 2>&1
-# ldconfig > /dev/null 2>&1
-# ## install pyzmq
-# pip install pyzmq > /dev/null 2>&1
-
+echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
+sudo apt-get install -y pkg-config python-redis python-zmq > /dev/null 2>&1
 
 echo "\e[32mMISP is ready\e[0m"
 echo "Login and passwords for the MISP image are the following:"

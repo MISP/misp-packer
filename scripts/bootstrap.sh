@@ -259,6 +259,9 @@ echo "--- Configuring Apache… ---"
 sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null
 
 
+echo "--- Adding Listen 8001 for misp-dashboard ---"
+sudo sed -i '/Listen 80/a Listen 0.0.0.0:8001' /etc/apache2/ports.conf
+
 echo "--- Add a VirtualHost for MISP and misp-dashboard ---"
 ## Again double check this perm madness ;)
 sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF

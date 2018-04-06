@@ -155,6 +155,8 @@ sudo apt-get purge -y expect > /dev/null 2>&1
 
 echo "--- Installing Apache2 ---"
 sudo apt-get install -y apache2 apache2-doc apache2-utils > /dev/null 2>&1
+echo "--- Installing mod-wsgi-py3 for misp-dashboard ---"
+sudo apt-get install -y libapache2-mod-wsgi-py3 > /dev/null 2>&1
 sudo a2dismod status > /dev/null 2>&1
 sudo a2enmod ssl > /dev/null 2>&1
 sudo a2enmod rewrite > /dev/null 2>&1
@@ -257,7 +259,7 @@ echo "--- Configuring Apache… ---"
 sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null
 
 
-echo "--- Add a VirtualHost for MISP ---"
+echo "--- Add a VirtualHost for MISP and misp-dashboard ---"
 ## Again double check this perm madness ;)
 sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
 <VirtualHost *:80>
@@ -277,6 +279,51 @@ sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
     ServerSignature Off
 </VirtualHost>
 EOF
+
+sudo cat > /etc/apache2/sites-available/misp-dashboard.conf <<EOF
+<VirtualHost *:8001>
+    ServerAdmin admin@misp.local
+    ServerName misp.local
+
+    DocumentRoot /var/www/misp-dashboard
+    
+    WSGIDaemonProcess misp-dashboard \
+       user=misp group=misp \
+       python-home=/var/www/misp-dashboard/DASHENV \
+       processes=1 \
+       threads=15 \
+       maximum-requests=5000 \
+       listen-backlog=100 \
+       queue-timeout=45 \
+       socket-timeout=60 \
+       connect-timeout=15 \
+       request-timeout=60 \
+       inactivity-timeout=0 \
+       deadlock-timeout=60 \
+       graceful-timeout=15 \
+       eviction-timeout=0 \
+       shutdown-timeout=5 \
+       send-buffer-size=0 \
+       receive-buffer-size=0 \
+       header-buffer-size=0 \
+       response-buffer-size=0 \
+       server-metrics=Off
+
+    WSGIScriptAlias / /var/www/misp-dashboard/misp-dashboard.wsgi
+
+    <Directory /var/www/misp-dashboard>
+        WSGIProcessGroup misp-dashboard
+        WSGIApplicationGroup %{GLOBAL}
+        Require all granted
+    </Directory>
+
+    LogLevel info
+    ErrorLog /var/log/apache2/misp-dashboard.local_error.log
+    CustomLog /var/log/apache2/misp-dashboard.local_access.log combined
+    ServerSignature Off
+</VirtualHost>
+EOF
+
 # cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
 # <VirtualHost *:80>
 #         ServerName misp.local
@@ -314,6 +361,7 @@ EOF
 # activate new vhost
 sudo a2dissite default-ssl
 sudo a2ensite misp-ssl
+sudo a2ensite misp-dashboard
 
 
 echo "--- Restarting Apache ---"

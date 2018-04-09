@@ -88,6 +88,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
   rm MISP_${VER}@${LATEST_COMMIT}-vmware.zip.asc
+  rm /tmp/LICENSE
   echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})

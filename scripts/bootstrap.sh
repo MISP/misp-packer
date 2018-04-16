@@ -207,8 +207,6 @@ sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git
 cd $PATH_TO_MISP/app/files/scripts/mixbox
 sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
-# install STIX2.0 library to support STIX 2.0 export:
-sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing misp-dashboard ---"
 cd /var/www
@@ -486,6 +484,8 @@ sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 sudo pip install pymisp python-magic > /dev/null 2>&1
 sudo pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 sudo pip install lief 2>&1
+# install STIX2.0 library to support STIX 2.0 export:
+sudo pip3 install stix2 > /dev/null 2>&1
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]

@@ -23,7 +23,7 @@ PACKER_LOG=1
 PWD=`pwd`
 
 # Fetching latest MISP LICENSE
-/usr/bin/wget -q -O /tmp/LICENSE https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
+/usr/bin/wget -q -O /tmp/LICENSE-misp https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
 # Place holder, this fn() should be used to anything signing related
 function signify()
@@ -88,7 +88,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
   rm MISP_${VER}@${LATEST_COMMIT}-vmware.zip.asc
-  rm /tmp/LICENSE
+  rm /tmp/LICENSE-misp
   echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})

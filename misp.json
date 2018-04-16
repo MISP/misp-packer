@@ -20,7 +20,7 @@
         [
             "--manifest",
             "--vsys", "0",
-            "--eulafile", "/tmp/LICENSE",
+            "--eulafile", "/tmp/LICENSE-misp",
             "--description", "{{user `vm_description`}}",
             "--version", "{{user `vm_version`}}"
         ],

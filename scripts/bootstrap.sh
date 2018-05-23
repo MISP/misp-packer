@@ -473,11 +473,13 @@ sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev 
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
+# pip3 install
 sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
 sudo pip3 install lief 2>&1
 sudo pip3 install pymisp python-magic > /dev/null 2>&1
 sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
+# pip2 install
 sudo pip2 install pymisp python-magic > /dev/null 2>&1
 sudo pip2 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 sudo pip2 install lief 2>&1

@@ -506,6 +506,12 @@ sudo pip3 install stix2 > /dev/null 2>&1
 # sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
 
 
+echo "--- Setting the permissions… ---"
+sudo chown -R www-data:www-data $PATH_TO_MISP
+sudo chmod -R 750 $PATH_TO_MISP
+sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
+sudo chmod -R g+ws $PATH_TO_MISP/app/files
+sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 
 echo "--- Restarting Apache… ---"
 sudo systemctl restart apache2 > /dev/null 2>&1
@@ -530,7 +536,14 @@ echo "--- Setting Baseurl ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 
 echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
-sudo apt-get install -y pkg-config python-redis python-zmq > /dev/null 2>&1
+sudo apt-get install -y pkg-config python-redis python-zmq python3-zmq > /dev/null 2>&1
+
+echo "--- Setting the permissions… ---"
+sudo chown -R www-data:www-data $PATH_TO_MISP
+sudo chmod -R 750 $PATH_TO_MISP
+sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
+sudo chmod -R g+ws $PATH_TO_MISP/app/files
+sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 
 echo "\e[32mMISP is ready\e[0m"
 echo "Login and passwords for the MISP image are the following:"

@@ -30,6 +30,7 @@
             ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,,2222,0.0.0.0,22" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "http,tcp,,8080,,80" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "dashboard,tcp,,8001,0.0.0.0,8001" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "misp-modules,tcp,,6666,0.0.0.0,6666" ],
             ["modifyvm", "{{.Name}}", "--vram", "32"]
         ],
 

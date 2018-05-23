@@ -196,16 +196,13 @@ cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
 sudo -u www-data git clone https://github.com/STIXProject/python-stix.git
 cd $PATH_TO_MISP/app/files/scripts/python-cybox
-sudo -u www-data git checkout v2.1.0.12
 sudo python setup.py install > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-stix
-sudo -u www-data git checkout v1.1.1.4
 sudo python setup.py install > /dev/null 2>&1
 # install mixbox to accomodate the new STIX dependencies:
 cd $PATH_TO_MISP/app/files/scripts/
 sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git
 cd $PATH_TO_MISP/app/files/scripts/mixbox
-sudo -u www-data git checkout v1.0.2
 sudo python setup.py install > /dev/null 2>&1
 
 echo "--- Installing misp-dashboard ---"

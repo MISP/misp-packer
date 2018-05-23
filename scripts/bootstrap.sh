@@ -526,6 +526,9 @@ curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --h
 echo "--- Updating the warning lists… ---"
 curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/warninglists/update
 
+echo "--- Updating the notice lists… ---"
+curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/noticelists/update
+
 echo "--- Updating the object templates… ---"
 curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/objectTemplates/update
 

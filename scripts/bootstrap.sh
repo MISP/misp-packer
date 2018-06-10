@@ -108,7 +108,7 @@ sudo apt-get -y upgrade
 sudo apt-get -y autoremove
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim zip > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -409,6 +409,18 @@ sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_sighting_not
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_user_notifications_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_organisation_notifications_enable" true
 
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.email" "admin@admin.test"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP/.gnupg"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.host_org_id" 1
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.email" "info@admin.test"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.disable_emailing" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.contact" "info@admin.test"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.disablerestalert" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.showCorrelationsOnIndex" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.autoRegenerate" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.timeout" 600
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.cookie_timeout" 3600
+
 echo "--- Generating a GPG encryption key… ---"
 sudo apt-get install -y rng-tools haveged
 sudo -u www-data mkdir $PATH_TO_MISP/.gnupg
@@ -546,6 +558,9 @@ sudo chmod -R 750 $PATH_TO_MISP
 sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
 sudo chmod -R g+ws $PATH_TO_MISP/app/files
 sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
+
+echo "--- Setting Baseurl ---"
+sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 
 echo "\e[32mMISP is ready\e[0m"
 echo "Login and passwords for the MISP image are the following:"

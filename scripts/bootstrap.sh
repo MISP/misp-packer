@@ -568,6 +568,7 @@ echo "Web interface (default network settings): $MISP_BASEURL"
 echo "MISP admin:  admin@admin.test/admin"
 echo "Shell/SSH: misp/Password1234"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"
+echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP" > mysql.txt
 
 
 TIME_END=$(date +%s)

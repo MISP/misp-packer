@@ -197,14 +197,14 @@ cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
 sudo -u www-data git clone https://github.com/STIXProject/python-stix.git
 cd $PATH_TO_MISP/app/files/scripts/python-cybox
-sudo python setup.py install > /dev/null 2>&1
+sudo python3 setup.py install > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-stix
-sudo python setup.py install > /dev/null 2>&1
+sudo python3 setup.py install > /dev/null 2>&1
 # install mixbox to accomodate the new STIX dependencies:
 cd $PATH_TO_MISP/app/files/scripts/
 sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git
 cd $PATH_TO_MISP/app/files/scripts/mixbox
-sudo python setup.py install > /dev/null 2>&1
+sudo python3 setup.py install > /dev/null 2>&1
 
 echo "--- Installing misp-dashboard ---"
 cd /var/www
@@ -489,6 +489,7 @@ cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
 sudo pip3 install lief 2>&1
+sudo pip3 install maec 2>&1
 sudo pip3 install pymisp python-magic > /dev/null 2>&1
 sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 # pip2 install

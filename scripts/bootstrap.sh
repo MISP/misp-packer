@@ -480,6 +480,7 @@ sudo sed -i -e '$i \sysctl vm.overcommit_memory=1\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
+sudo sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &\n' /etc/rc.local
 
 echo "--- Installing MISP modules… ---"
 sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
@@ -518,6 +519,35 @@ sudo pip3 install stix2 > /dev/null 2>&1
 # With initd:
 # sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
 
+echo "--- Installing viper-framework ---"
+cd /usr/local/src/
+sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite
+sudo pip3 install SQLAlchemy PrettyTable python-magic 2>&1
+sudo git clone https://github.com/viper-framework/viper.git
+cd viper
+sudo pip3 install -r requirements.txt > /dev/null 2>&1
+/usr/local/src/viper/viper-cli -h > /dev/null 2>&1
+echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/src/viper"' |sudo tee /etc/environment
+
+echo "--- Installing mail2misp ---"
+cd /usr/local/src/
+sudo apt-get install -y cmake
+sudo git clone https://github.com/MISP/mail_to_misp.git
+sudo git clone git://github.com/stricaud/faup.git
+cd faup
+sudo mkdir -p build
+cd build
+sudo cmake .. && sudo make
+sudo make install
+sudo ldconfig
+cd ../../
+cd mail_to_misp
+sudo pip3 install -r requirements.txt > /dev/null 2>&1
+sudo cp mail_to_misp_config.py-example mail_to_misp_config.py
+
+echo "--- Generating Certificate ---"
+sudo openssl req -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
+
 
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP
@@ -553,6 +583,16 @@ sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 
 echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
 sudo apt-get install -y pkg-config python-redis python-zmq python3-zmq > /dev/null 2>&1
+
+echo "--- Configuring viper ---"
+sed -i "s/^misp_url\ =/misp_url\ =\ http:\/\/localhost/g" ~/.viper/viper.conf
+sed -i "s/^misp_key\ =/misp_key\ =\ $AUTH_KEY/g" ~/.viper/viper.conf
+# Setting viper-web admin user password to 'Password1234'
+sqlite3 ~/.viper/admin.db 'UPDATE auth_user SET password="pbkdf2_sha256$100000$iXgEJh8hz7Cf$vfdDAwLX8tko1t0M1TLTtGlxERkNnltUnMhbv56wK/U="'
+
+echo "--- Configuring mail2misp ---"
+sudo sed -i "s/^misp_url\ =\ 'YOUR_MISP_URL'/misp_url\ =\ 'http:\/\/localhost'/g" /usr/local/src/mail_to_misp/mail_to_misp_config.py
+sudo sed -i "s/^misp_key\ =\ 'YOUR_KEY_HERE'/misp_key\ =\ '$AUTH_KEY'/g" /usr/local/src/mail_to_misp/mail_to_misp_config.py
 
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP

@@ -480,7 +480,7 @@ sudo sed -i -e '$i \sysctl vm.overcommit_memory=1\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
-sudo sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &\n' /etc/rc.local
+sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &\n' /etc/rc.local
 
 echo "--- Installing MISP modules… ---"
 sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
@@ -521,13 +521,15 @@ sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
-sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2
-sudo pip3 install SQLAlchemy PrettyTable python-magic 2>&1
-sudo git clone https://github.com/viper-framework/viper.git
+apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2
+pip3 install SQLAlchemy PrettyTable python-magic 2>&1
+git clone https://github.com/viper-framework/viper.git
 cd viper
-sudo pip3 install -r requirements.txt > /dev/null 2>&1
-/usr/local/src/viper/viper-cli -h > /dev/null 2>&1
-/usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
+git submodule init
+git submodule update
+pip3 install -r requirements.txt > /dev/null 2>&1
+sudo -u misp /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
+sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
 echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/src/viper"' |sudo tee /etc/environment
 
 echo "--- Installing mail2misp ---"

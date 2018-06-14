@@ -436,7 +436,7 @@ cat >/tmp/gen-key-script <<EOF
     Name-Comment: $GPG_COMMENT
     Name-Email: $GPG_EMAIL_ADDRESS
     Expire-Date: 0
-    Passphrase: '$GPG_PASSPHRASE'
+    Passphrase: $GPG_PASSPHRASE
     # Do a commit here, so that we can later print "done"
     %commit
     %echo done
@@ -521,7 +521,7 @@ sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
-sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool
+sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2
 sudo pip3 install SQLAlchemy PrettyTable python-magic 2>&1
 sudo git clone https://github.com/viper-framework/viper.git
 cd viper
@@ -602,6 +602,7 @@ sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
 sudo chmod -R g+ws $PATH_TO_MISP/app/files
 sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 sudo chmod 700 $PATH_TO_MISP/.gnupg
+sudo chown -R misp:misp ~misp/.viper
 
 echo "--- Setting Baseurl ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
@@ -613,6 +614,7 @@ echo "MISP admin:  admin@admin.test/admin"
 echo "Shell/SSH: misp/Password1234"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP" > ~/mysql.txt
+chown misp:misp ~/mysql.txt
 
 
 TIME_END=$(date +%s)

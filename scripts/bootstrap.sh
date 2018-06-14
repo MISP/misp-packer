@@ -527,6 +527,7 @@ sudo git clone https://github.com/viper-framework/viper.git
 cd viper
 sudo pip3 install -r requirements.txt > /dev/null 2>&1
 /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
+/usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
 echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/src/viper"' |sudo tee /etc/environment
 
 echo "--- Installing mail2misp ---"

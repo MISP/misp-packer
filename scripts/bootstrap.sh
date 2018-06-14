@@ -521,7 +521,7 @@ sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
-sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite
+sudo apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool
 sudo pip3 install SQLAlchemy PrettyTable python-magic 2>&1
 sudo git clone https://github.com/viper-framework/viper.git
 cd viper

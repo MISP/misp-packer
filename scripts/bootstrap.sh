@@ -192,7 +192,7 @@ sudo -u www-data git config core.filemode false
 
 
 echo "--- Installing Mitre's STIX ---"
-sudo apt-get install -y python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
+sudo apt-get install -y python-dev python3-dev python-pip python3-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
 sudo -u www-data git clone https://github.com/STIXProject/python-stix.git
@@ -481,7 +481,7 @@ sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.loc
 sudo sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
 
 echo "--- Installing MISP modules… ---"
-sudo apt-get install -y python3-dev python3-pip libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
+sudo apt-get install -y libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules

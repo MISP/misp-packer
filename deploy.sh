@@ -61,7 +61,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
 
   # Current file list of everything to gpg sign and transfer
-  FILE_LIST="MISP_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/MISP_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha512 mysql.txt"
+  FILE_LIST="MISP_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/MISP_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
 
   # Create the latest MISP export directory
   ssh ${REL_USER}@${REL_SERVER} mkdir -p export/MISP_${VER}@${LATEST_COMMIT}
@@ -79,7 +79,6 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "MISP VM Images" -H https://www.circl.lu/misp-images/ -o index.html
 
   # Remove files for next run
-  rm mysql.txt
   rm -r output-virtualbox-iso
   rm -r output-vmware-iso
   rm *.checksum *.zip *.sha*

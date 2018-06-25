@@ -469,18 +469,24 @@ if [ ! -e /etc/rc.local ]
 then
     echo '#!/bin/sh -e' | sudo tee -a /etc/rc.local
     echo 'exit 0' | sudo tee -a /etc/rc.local
-    sudo chmod u+x /etc/rc.local
+    chmod u+x /etc/rc.local
 fi
 
 
 # redis-server requires the following /sys/kernel tweak
-sudo sed -i -e '$i \echo never > /sys/kernel/mm/transparent_hugepage/enabled\n' /etc/rc.local
-sudo sed -i -e '$i \echo 1024 > /proc/sys/net/core/somaxconn\n' /etc/rc.local
-sudo sed -i -e '$i \sysctl vm.overcommit_memory=1\n' /etc/rc.local
-sudo sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
-sudo sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
-sudo sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
+sed -i -e '$i \echo never > /sys/kernel/mm/transparent_hugepage/enabled\n' /etc/rc.local
+sed -i -e '$i \echo 1024 > /proc/sys/net/core/somaxconn\n' /etc/rc.local
+sed -i -e '$i \sysctl vm.overcommit_memory=1\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s &\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh\n' /etc/rc.local
 sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &\n' /etc/rc.local
+sed -i -e '$i \git_dirs="/usr/local/src/misp-modules/ /var/www/misp-dashboard /usr/local/src/faup /usr/local/src/mail_to_misp /usr/local/src/misp-modules /usr/local/src/viper /var/www/misp-dashboard"\n' /etc/rc.local
+sed -i -e '$i \for d in $git_dirs; do\n' /etc/rc.local
+sed -i -e '$i \    echo "Updating ${d}"\n' /etc/rc.local
+sed -i -e '$i \    cd $d && sudo git pull &\n' /etc/rc.local
+sed -i -e '$i \done\n' /etc/rc.local
+
 
 echo "--- Installing MISP modules… ---"
 sudo apt-get install -y libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1

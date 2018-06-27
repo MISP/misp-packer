@@ -612,6 +612,10 @@ sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
 sudo chmod 700 $PATH_TO_MISP/.gnupg
 sudo chown -R misp:misp ~misp/.viper
 
+echo "--- Ignoring filemode on all submodules ---"
+cd $PATH_TO_MISP
+git submodule foreach --recursive git config core.filemode false
+
 echo "--- Setting Baseurl ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
 

@@ -109,7 +109,7 @@ sudo apt-get -y upgrade
 sudo apt-get -y autoremove
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -615,6 +615,9 @@ sudo chown -R misp:misp ~misp/.viper
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP
 git submodule foreach --recursive git config core.filemode false
+
+echo "--- autoremove for apt ---"
+apt-get autoremove
 
 echo "--- Setting Baseurl ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""

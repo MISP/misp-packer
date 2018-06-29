@@ -401,6 +401,7 @@ sudo chmod -R 750 $PATH_TO_MISP/app/Config
 # Set some MISP directives with the command line tool
 sudo $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 
+# Enable ZeroMQ
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_event_notifications_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_object_notifications_enable" true
@@ -410,15 +411,73 @@ sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_sighting_not
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_user_notifications_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.ZeroMQ_organisation_notifications_enable" true
 
+# Enable GnuPG
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.email" "admin@admin.test"
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP/.gnupg"
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.password" "Password1234"
+
+# Enable Enrichment set better timeouts
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_timeout" 300
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_hover_timeout" 150
+
+# Enable Import modules set better timout
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_timeout" 300
+
+# Enable Export modules set better timout
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Export_timeout" 300
+
+# Enable installer org and tune some configurables
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.host_org_id" 1
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.email" "info@admin.test"
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.disable_emailing" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.contact" "info@admin.test"
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.disablerestalert" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.showCorrelationsOnIndex" true
+
+# Provisional Cortex tunes
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_url" "http://127.0.0.1"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_port" 9000
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_timeout" 120
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_authkey" ""
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_ssl_verify_peer" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_ssl_verify_host" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Cortex_ssl_allow_self_signed" true
+
+# Force defaults to make MISP Server Settings less RED
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.language" "eng"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.proposals_block_attributes" false
+## Redis block
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.redis_host" "127.0.0.1"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.redis_port" 6379
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.redis_database" 13
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.redis_password" ""
+
+# Force defaults to make MISP Server Settings less YELLOW
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.ssdeep_correlation_threshold" 40
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.extended_alert_subject" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.default_event_threat_level" 4
+#sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.newUserText" "Dear new MISP user,\n\nWe would hereby like to welcome you to the $org MISP community.\n\n Use the credentials below to log into MISP at $misp, where you will be prompted to manually change your password to something of your own choice.\n\nUsername: $username\nPassword: $password\n\nIf you have any questions, don't hesitate to contact us at: $contact.\n\nBest regards,\nYour $org MISP support team"
+#sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.passwordResetText" "Dear MISP user,\n\nA password reset has been triggered for your account. Use the below provided temporary password to log into MISP at $misp, where you will be prompted to manually change your password to something of your own choice.\n\nUsername: $username\nYour temporary password: $password\n\nIf you have any questions, don't hesitate to contact us at: $contact.\n\nBest regards,\nYour $org MISP support team"
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.enableEventBlacklisting" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.enableOrgBlacklisting" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.log_client_ip" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.log_auth" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.disableUserSelfManagement" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.block_event_alert" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.block_event_alert_tag" "no-alerts=\"true\""
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.block_old_event_alert" false
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.block_old_event_alert_age" ""
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.incoming_tags_disabled_by_default" false
+
+# Force defaults to make MISP Server Settings less GREEN
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Security.password_policy_length" 12
+# sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Security.password_policy_complexity" "/^((?=.*\d)|(?=.*\W+))(?![\n])(?=.*[A-Z])(?=.*[a-z]).*$|.{16,}/"
+
+# Tune global time outs
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.autoRegenerate" 0
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.timeout" 600
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.cookie_timeout" 3600
@@ -498,10 +557,10 @@ sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
 sudo pip3 install lief 2>&1
 sudo pip3 install maec 2>&1
-sudo pip3 install pymisp python-magic > /dev/null 2>&1
+sudo pip3 install pymisp python-magic wand yara > /dev/null 2>&1
 sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 # pip2 install
-sudo pip2 install pymisp python-magic > /dev/null 2>&1
+sudo pip2 install pymisp python-magic wand yara > /dev/null 2>&1
 sudo pip2 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 sudo pip2 install lief 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
@@ -619,8 +678,9 @@ git submodule foreach --recursive git config core.filemode false
 echo "--- autoremove for apt ---"
 apt-get autoremove
 
-echo "--- Setting Baseurl ---"
+echo "--- Setting Baseurl and making sure Sessions do NOT auto regenerate ---"
 sudo $PATH_TO_MISP/app/Console/cake Baseurl ""
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Session.autoRegenerate" 0
 
 echo "\e[32mMISP is ready\e[0m"
 echo "Login and passwords for the MISP image are the following:"

@@ -109,7 +109,7 @@ sudo apt-get -y upgrade
 sudo apt-get -y autoremove
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -667,6 +667,10 @@ sqlite3 ~/.viper/admin.db 'UPDATE auth_user SET password="pbkdf2_sha256$100000$i
 echo "--- Configuring mail2misp ---"
 sudo sed -i "s/^misp_url\ =\ 'YOUR_MISP_URL'/misp_url\ =\ 'http:\/\/localhost'/g" /usr/local/src/mail_to_misp/mail_to_misp_config.py
 sudo sed -i "s/^misp_key\ =\ 'YOUR_KEY_HERE'/misp_key\ =\ '$AUTH_KEY'/g" /usr/local/src/mail_to_misp/mail_to_misp_config.py
+
+echo "--- Installing asciidoctor-pdf ---"
+gem install asciidoctor-pdf
+gem install pygments.rb
 
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP

@@ -418,16 +418,22 @@ sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "GnuPG.password" "Password1
 
 # Enable Enrichment set better timeouts
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_hover_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_timeout" 300
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_hover_timeout" 150
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_cve_enabled" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_dns_enabled" true
 
 # Enable Import modules set better timout
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_timeout" 300
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_ocr_enabled" true
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Import_csvimport_enabled" true
 
 # Enable Export modules set better timout
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Export_timeout" 300
+sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "Plugin.Export_pdfexport_enabled" true
 
 # Enable installer org and tune some configurables
 sudo $PATH_TO_MISP/app/Console/cake Admin setSetting "MISP.host_org_id" 1

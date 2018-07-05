@@ -210,7 +210,7 @@ echo "--- Installing misp-dashboard ---"
 cd /var/www
 sudo mkdir misp-dashboard
 sudo chown www-data:www-data misp-dashboard
-sudo -u www-data git clone https://github.com/SteveClement/misp-dashboard.git
+sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
 cd misp-dashboard
 sudo /var/www/misp-dashboard/install_dependencies.sh
 sudo sed -i "s/^host\ =\ localhost/host\ =\ 0.0.0.0/g" /var/www/misp-dashboard/config/config.cfg

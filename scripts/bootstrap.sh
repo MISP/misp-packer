@@ -222,6 +222,8 @@ cd $PATH_TO_MISP
 sudo -u www-data git submodule init
 sudo -u www-data git submodule update
 # Once done, install CakeResque along with its dependencies if you intend to use the built in background jobs:
+# Make composer cache happy
+mkdir /var/www/.composer ; chown www-data:www-data /var/www/.composer
 cd $PATH_TO_MISP/app
 sudo -u www-data php composer.phar require kamisama/cake-resque:4.1.2
 sudo -u www-data php composer.phar config vendor-dir Vendor
@@ -432,7 +434,7 @@ $CAKE Admin setSetting "Plugin.Enrichment_timeout" 300
 $CAKE Admin setSetting "Plugin.Enrichment_hover_timeout" 150
 $CAKE Admin setSetting "Plugin.Enrichment_cve_enabled" true
 $CAKE Admin setSetting "Plugin.Enrichment_dns_enabled" true
-$CAKE Amdin setSetting "Plugin.Enrichment_services_url" "http://127.0.0.1"
+$CAKE Admin setSetting "Plugin.Enrichment_services_url" "http://127.0.0.1"
 $CAKE Admin setSetting "Plugin.Enrichment_services_port" 6666
 
 # Enable Import modules set better timout
@@ -599,6 +601,7 @@ sed -i -e '$i \done\n' /etc/rc.local
 
 
 echo "--- Installing MISP modules… ---"
+mkdir /home/misp/.cache/
 sudo apt-get install -y libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git

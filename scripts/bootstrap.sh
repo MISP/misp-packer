@@ -122,7 +122,6 @@ echo "postfix postfix/mailname string `hostname`.misp.local" | debconf-set-selec
 echo "postfix postfix/main_mailer_type string 'Satellite system'" | debconf-set-selections
 sudo apt-get install -y postfix > /dev/null 2>&1
 
-
 echo "--- Installing MariaDB specific packages and settings ---"
 sudo apt-get install -y mariadb-client mariadb-server > /dev/null 2>&1
 # Secure the MariaDB installation (especially by setting a strong root password)
@@ -611,14 +610,9 @@ sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
 sudo pip3 install -I . > /dev/null 2>&1
 sudo pip3 install lief 2>&1
 sudo pip3 install maec 2>&1
-sudo pip2 install pathlib 2>&1
 sudo pip3 install pathlib 2>&1
 sudo pip3 install pymisp python-magic wand yara > /dev/null 2>&1
 sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
-# pip2 install
-sudo pip2 install pymisp python-magic wand yara > /dev/null 2>&1
-sudo pip2 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
-sudo pip2 install lief 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
 sudo pip3 install stix2 > /dev/null 2>&1
 # With systemd:
@@ -642,8 +636,7 @@ sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
-apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2
-pip3 install SQLAlchemy PrettyTable python-magic 2>&1
+apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2 pip3 install SQLAlchemy PrettyTable python-magic 2>&1
 git clone https://github.com/viper-framework/viper.git
 cd viper
 git submodule init
@@ -672,7 +665,6 @@ sudo cp mail_to_misp_config.py-example mail_to_misp_config.py
 echo "--- Generating Certificate ---"
 sudo openssl req -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
 
-
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP
 sudo chmod -R 750 $PATH_TO_MISP
@@ -687,19 +679,21 @@ sleep 5
 echo "--- Updating the galaxies… ---"
 sudo -E $PATH_TO_MISP/app/Console/cake userInit -q > /dev/null
 AUTH_KEY=$(mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP misp -e "SELECT authkey FROM users;" | tail -1)
-echo "--- Updating the galaxies… ---"
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/galaxies/update
+# Update the galaxies…
+$CAKE Admin updateGalaxies
 
-echo "--- Updating the taxonomies… ---"
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/taxonomies/update
+# Updating the taxonomies…
+$CAKE Admin updateTaxonomies
 
-echo "--- Updating the warning lists… ---"
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/warninglists/update
+# Updating the warning lists…
+$CAKE Admin updateWarningLists
 
-echo "--- Updating the notice lists… ---"
+# Updating the notice lists…
+## sudo $CAKE Admin updateNoticeLists
 curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/noticelists/update
 
-echo "--- Updating the object templates… ---"
+# Updating the object templates…
+##sudo $CAKE Admin updateObjectTemplates
 curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/objectTemplates/update
 
 echo "--- Setting Baseurl ---"
@@ -722,18 +716,9 @@ echo "--- Installing asciidoctor-pdf ---"
 gem install asciidoctor-pdf --pre
 gem install pygments.rb
 
-echo "--- Setting the permissions… ---"
-sudo chown -R www-data:www-data $PATH_TO_MISP
-sudo chmod -R 750 $PATH_TO_MISP
-sudo chmod -R g+ws $PATH_TO_MISP/app/tmp
-sudo chmod -R g+ws $PATH_TO_MISP/app/files
-sudo chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
-sudo chmod 700 $PATH_TO_MISP/.gnupg
-sudo chown -R misp:misp ~misp/.viper
-
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP
-git submodule foreach --recursive git config core.filemode false
+sudo -u www-data git submodule foreach --recursive git config core.filemode false
 
 echo "--- autoremove for apt ---"
 apt-get autoremove
@@ -749,8 +734,16 @@ echo "MISP admin:  admin@admin.test/admin"
 echo "Shell/SSH: misp/Password1234"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP"
 echo "MySQL:  $DBUSER_ADMIN/$DBPASSWORD_ADMIN - $DBUSER_MISP/$DBPASSWORD_MISP" > ~/mysql.txt
-chown misp:misp ~/mysql.txt
 
+echo "--- Setting the permissions… ---"
+chown -R www-data:www-data $PATH_TO_MISP
+chmod -R 750 $PATH_TO_MISP
+chmod -R g+ws $PATH_TO_MISP/app/tmp
+chmod -R g+ws $PATH_TO_MISP/app/files
+chmod -R g+ws $PATH_TO_MISP/app/files/scripts/tmp
+chmod 700 $PATH_TO_MISP/.gnupg
+chown -R misp:misp ~misp/.viper
+chown misp:misp ~/mysql.txt
 
 TIME_END=$(date +%s)
 TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})

@@ -192,7 +192,7 @@ sudo -u www-data git config core.filemode false
 
 
 echo "--- Installing Mitre's STIX ---"
-sudo apt-get install -y python-dev python3-dev python-pip python3-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
+sudo apt-get install -y python-dev python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
 sudo -u www-data git clone https://github.com/STIXProject/python-stix.git

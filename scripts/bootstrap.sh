@@ -646,24 +646,27 @@ sudo -u misp /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
 echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/src/viper"' |sudo tee /etc/environment
 
+# TODO: fix faup
 echo "--- Installing mail2misp ---"
 cd /usr/local/src/
-sudo apt-get install -y cmake
-sudo git clone https://github.com/MISP/mail_to_misp.git
-sudo git clone git://github.com/stricaud/faup.git
+apt-get install -y cmake
+git clone https://github.com/MISP/mail_to_misp.git
+git clone git://github.com/stricaud/faup.git faup
+chown -R misp:misp faup mail_to_misp
 cd faup
-sudo mkdir -p build
+sudo -u misp git checkout 96f2a9a51428869cac2473422b70ace890d5d95d
+sudo -u misp mkdir build
 cd build
-sudo cmake .. && sudo make
-sudo make install
-sudo ldconfig
+sudo -u misp cmake .. && sudo -u misp make
+make install
+ldconfig
 cd ../../
 cd mail_to_misp
-sudo pip3 install -r requirements.txt > /dev/null 2>&1
-sudo cp mail_to_misp_config.py-example mail_to_misp_config.py
+pip3 install -r requirements.txt > /dev/null 2>&1
+sudo -u misp cp mail_to_misp_config.py-example mail_to_misp_config.py
 
 echo "--- Generating Certificate ---"
-sudo openssl req -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
+openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
 
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP

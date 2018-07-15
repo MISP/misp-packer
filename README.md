@@ -47,6 +47,10 @@ You can also launch all builders in parallel.
 * [MISP galaxy](https://github.com/MISP/misp-galaxy)
 * [MISP modules](https://github.com/MISP/misp-modules)
 * [MISP taxonomies](https://github.com/MISP/misp-taxonomies)
+* [MISP noticelists](https://github.com/MISP/misp-noticelist)
+* [MISP warninglists](https://github.com/MISP/misp-warninglists)
+* [MISP ZMQ](https://github.com/MISP/misp-book/tree/master/misp-zmq)
+* [MISP dashboard](https://github.com/MISP/misp-dashboard)
 
 ## Automatic export to GitHub
 

@@ -161,6 +161,7 @@ sudo apt-get install -y libapache2-mod-wsgi-py3 > /dev/null 2>&1
 sudo a2dismod status > /dev/null 2>&1
 sudo a2enmod ssl > /dev/null 2>&1
 sudo a2enmod rewrite > /dev/null 2>&1
+sudo a2enmod headers > /dev/null 2>&1
 sudo a2dissite 000-default > /dev/null 2>&1
 sudo a2ensite default-ssl > /dev/null 2>&1
 
@@ -278,6 +279,8 @@ sudo cat > /etc/apache2/sites-available/misp-ssl.conf <<EOF
     ErrorLog /var/log/apache2/misp.local_error.log
     CustomLog /var/log/apache2/misp.local_access.log combined
     ServerSignature Off
+    Header set X-Content-Type-Options nosniff
+    Header set X-Frame-Options DENY
 </VirtualHost>
 EOF
 
@@ -689,7 +692,8 @@ $CAKE Admin updateGalaxies
 $CAKE Admin updateTaxonomies
 
 # Updating the warning lists…
-$CAKE Admin updateWarningLists
+##$CAKE Admin updateWarningLists
+curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/warninglists/update
 
 # Updating the notice lists…
 ## sudo $CAKE Admin updateNoticeLists

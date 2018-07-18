@@ -213,21 +213,21 @@ sudo mkdir misp-dashboard
 sudo chown www-data:www-data misp-dashboard
 sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
 cd misp-dashboard
-sudo /var/www/misp-dashboard/install_dependencies.sh
+sudo /var/www/misp-dashboard/install_dependencies.sh > /dev/null 2>&1
 sudo sed -i "s/^host\ =\ localhost/host\ =\ 0.0.0.0/g" /var/www/misp-dashboard/config/config.cfg
 
 echo "--- Retrieving CakePHP… ---"
 # CakePHP is included as a submodule of MISP, execute the following commands to let git fetch it:
 cd $PATH_TO_MISP
-sudo -u www-data git submodule init
-sudo -u www-data git submodule update
+sudo -u www-data git submodule init > /dev/null 2>&1
+sudo -u www-data git submodule update > /dev/null 2>&1
 # Once done, install CakeResque along with its dependencies if you intend to use the built in background jobs:
 # Make composer cache happy
 mkdir /var/www/.composer ; chown www-data:www-data /var/www/.composer
 cd $PATH_TO_MISP/app
-sudo -u www-data php composer.phar require kamisama/cake-resque:4.1.2
-sudo -u www-data php composer.phar config vendor-dir Vendor
-sudo -u www-data php composer.phar install
+sudo -u www-data php composer.phar require kamisama/cake-resque:4.1.2 > /dev/null 2>&1
+sudo -u www-data php composer.phar config vendor-dir Vendor > /dev/null 2>&1
+sudo -u www-data php composer.phar install > /dev/null 2>&1
 # Enable CakeResque with php-redis
 sudo phpenmod redis
 # To use the scheduler worker for scheduled tasks, do the following:
@@ -255,7 +255,7 @@ echo "--- Configuring Apache… ---"
 # !!! apache.24.misp.ssl seems to be missing
 #cp $PATH_TO_MISP/INSTALL/apache.24.misp.ssl /etc/apache2/sites-available/misp-ssl.conf
 # If a valid SSL certificate is not already created for the server, create a self-signed certificate:
-sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null
+sudo openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=$OPENSSL_C/ST=$OPENSSL_ST/L=$OPENSSL_L/O=<$OPENSSL_O/OU=$OPENSSL_OU/CN=$OPENSSL_CN/emailAddress=$OPENSSL_EMAILADDRESS" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null 2>&1
 
 
 echo "--- Adding Listen 8001 for misp-dashboard ---"
@@ -699,8 +699,8 @@ cd /usr/local/src/
 apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2 pip3 install SQLAlchemy PrettyTable python-magic > /dev/null 2>&1
 git clone https://github.com/viper-framework/viper.git
 cd viper
-git submodule init
-git submodule update
+git submodule init > /dev/null 2>&1
+git submodule update > /dev/null 2>&1
 pip3 install -r requirements.txt > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
@@ -710,12 +710,12 @@ echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/ga
 echo "--- Installing mail2misp ---"
 cd /usr/local/src/
 apt-get install -y cmake > /dev/null 2>&1
-git clone https://github.com/MISP/mail_to_misp.git
-git clone git://github.com/stricaud/faup.git faup
+git clone https://github.com/MISP/mail_to_misp.git > /dev/null 2>&1
+git clone git://github.com/stricaud/faup.git faup > /dev/null 2>&1
 chown -R misp:misp faup mail_to_misp
 cd faup/build
-sudo -u misp cmake .. && sudo -u misp make
-make install
+sudo -u misp cmake .. && sudo -u misp make > /dev/null 2>&1
+make install > /dev/null 2>&1
 ldconfig
 cd ../../
 cd mail_to_misp
@@ -723,7 +723,7 @@ pip3 install -r requirements.txt > /dev/null 2>&1
 sudo -u misp cp mail_to_misp_config.py-example mail_to_misp_config.py
 
 echo "--- Generating Certificate ---"
-openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt
+openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null 2>&1
 
 echo "--- Setting the permissions… ---"
 sudo chown -R www-data:www-data $PATH_TO_MISP
@@ -740,25 +740,22 @@ echo "--- Updating the galaxies… ---"
 sudo -E $PATH_TO_MISP/app/Console/cake userInit -q > /dev/null
 AUTH_KEY=$(mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP misp -e "SELECT authkey FROM users;" | tail -1)
 # Update the galaxies…
-$CAKE Admin updateGalaxies
+$CAKE Admin updateGalaxies > /dev/null 2>&1
 
 # Updating the taxonomies…
-$CAKE Admin updateTaxonomies
+$CAKE Admin updateTaxonomies > /dev/null 2>&1
 
 # Updating the warning lists…
 ##$CAKE Admin updateWarningLists
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/warninglists/update
+curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/warninglists/update > /dev/null 2>&1
 
 # Updating the notice lists…
 ## sudo $CAKE Admin updateNoticeLists
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/noticelists/update
+curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/noticelists/update > /dev/null 2>&1
 
 # Updating the object templates…
 ##sudo $CAKE Admin updateObjectTemplates
-curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/objectTemplates/update
-
-echo "--- Setting Baseurl ---"
-$CAKE Baseurl ""
+curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/objectTemplates/update > /dev/null 2>&1
 
 echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
 sudo apt-get install -y pkg-config python-redis python-zmq python3-zmq > /dev/null 2>&1
@@ -774,19 +771,19 @@ sudo sed -i "s/^misp_url\ =\ 'YOUR_MISP_URL'/misp_url\ =\ 'http:\/\/localhost'/g
 sudo sed -i "s/^misp_key\ =\ 'YOUR_KEY_HERE'/misp_key\ =\ '$AUTH_KEY'/g" /usr/local/src/mail_to_misp/mail_to_misp_config.py
 
 echo "--- Installing asciidoctor-pdf ---"
-gem install asciidoctor-pdf --pre
-gem install pygments.rb
+gem install asciidoctor-pdf --pre > /dev/null 2>&1
+gem install pygments.rb > /dev/null 2>&1
 
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP
-sudo -u www-data git submodule foreach --recursive git config core.filemode false
+sudo -u www-data git submodule foreach --recursive git config core.filemode false > /dev/null 2>&1
 
 echo "--- autoremove for apt ---"
-apt-get autoremove
+apt-get autoremove > /dev/null 2>&1
 
 echo "--- Setting Baseurl and making sure Sessions do NOT auto regenerate ---"
-$CAKE Baseurl ""
-$CAKE Admin setSetting "Session.autoRegenerate" 0
+$CAKE Baseurl "" > /dev/null 2>&1
+$CAKE Admin setSetting "Session.autoRegenerate" 0 > /dev/null 2>&1
 
 echo "\e[32mMISP is ready\e[0m"
 echo "Login and passwords for the MISP image are the following:"

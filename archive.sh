@@ -1,4 +1,6 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env bash
+
+set -x
 
 VERSIONS="2.4.80 2.4.81 2.4.82 2.4.83 2.4.84 2.4.85 2.4.86 2.4.87 2.4.88 2.4.89 2.4.90 2.4.91 2.4.92 2.4.93"
 for VERSION in `echo ${VERSIONS}`; do

@@ -290,7 +290,7 @@ sudo cat > /etc/apache2/sites-available/misp-dashboard.conf <<EOF
     ServerName misp.local
 
     DocumentRoot /var/www/misp-dashboard
-    
+
     WSGIDaemonProcess misp-dashboard \
        user=misp group=misp \
        python-home=/var/www/misp-dashboard/DASHENV \
@@ -426,7 +426,8 @@ $CAKE Admin setSetting "Plugin.ZeroMQ_audit_notifications_enable" false
 
 # Enable GnuPG
 $CAKE Admin setSetting "GnuPG.email" "admin@admin.test"
-$CAKE Admin setSetting "GnuPG.homedir" "/var/www/MISP/.gnupg"
+$CAKE Admin setSetting "GnuPG.homedir" ${PATH_TO_MISP}/.gnupg
+$CAKE Admin setSetting "GnuPG.binary" `which gpg`
 $CAKE Admin setSetting "GnuPG.password" "Password1234"
 
 # Enable Enrichment set better timeouts
@@ -438,6 +439,36 @@ $CAKE Admin setSetting "Plugin.Enrichment_cve_enabled" true
 $CAKE Admin setSetting "Plugin.Enrichment_dns_enabled" true
 $CAKE Admin setSetting "Plugin.Enrichment_services_url" "http://127.0.0.1"
 $CAKE Admin setSetting "Plugin.Enrichment_services_port" 6666
+$CAKE Admin setSetting "Plugin.Enrichment_vmray_submit_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_asn_history_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_circl_passivedns_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_circl_passivessl_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_countrycode_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_domaintools_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_eupi_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_farsight_passivedns_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_ipasn_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_passivetotal_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_sourcecache_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_virustotal_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_whois_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_shodan_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_reversedns_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_geoip_country_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_wiki_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_iprep_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_threatminer_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_otx_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_threatcrowd_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_vulndb_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_crowdstrike_falcon_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_yara_syntax_validator_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_hashdd_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_onyphe_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_onyphe_full_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_rbl_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_xforceexchange_enabled" false
+$CAKE Admin setSetting "Plugin.Enrichment_xforceexchange_enabled" false
 
 # Enable Import modules set better timout
 $CAKE Admin setSetting "Plugin.Import_services_enable" true
@@ -446,6 +477,15 @@ $CAKE Admin setSetting "Plugin.Import_services_port" 6666
 $CAKE Admin setSetting "Plugin.Import_timeout" 300
 $CAKE Admin setSetting "Plugin.Import_ocr_enabled" true
 $CAKE Admin setSetting "Plugin.Import_csvimport_enabled" true
+$CAKE Admin setSetting "Plugin.Import_vmray_import_enabled" false
+$CAKE Admin setSetting "Plugin.Import_testimport_enabled" false
+$CAKE Admin setSetting "Plugin.Import_ocr_enabled" false
+$CAKE Admin setSetting "Plugin.Import_cuckooimport_enabled" false
+$CAKE Admin setSetting "Plugin.Import_goamlimport_enabled" false
+$CAKE Admin setSetting "Plugin.Import_email_import_enabled" false
+$CAKE Admin setSetting "Plugin.Import_mispjson_enabled" false
+$CAKE Admin setSetting "Plugin.Import_openiocimport_enabled" false
+$CAKE Admin setSetting "Plugin.Import_threatanalyzer_import_enabled" false
 
 # Enable Export modules set better timout
 $CAKE Admin setSetting "Plugin.Export_services_enable" true
@@ -453,6 +493,14 @@ $CAKE Admin setSetting "Plugin.Export_services_url" "http://127.0.0.1"
 $CAKE Admin setSetting "Plugin.Export_services_port" 6666
 $CAKE Admin setSetting "Plugin.Export_timeout" 300
 $CAKE Admin setSetting "Plugin.Export_pdfexport_enabled" true
+$CAKE Admin setSetting "Plugin.Export_testexport_enabled" false
+$CAKE Admin setSetting "Plugin.Export_testexport_restrict" 1
+$CAKE Admin setSetting "Plugin.Export_cef_export_enabled" false
+$CAKE Admin setSetting "Plugin.Export_liteexport_enabled" false
+$CAKE Admin setSetting "Plugin.Export_goamlexport_enabled" false
+$CAKE Admin setSetting "Plugin.Export_threat_connect_export_enabled" false
+$CAKE Admin setSetting "Plugin.Export_threatStream_misp_export_enabled" false
+
 
 # Enable installer org and tune some configurables
 $CAKE Admin setSetting "MISP.host_org_id" 1
@@ -474,6 +522,9 @@ $CAKE Admin setSetting "Plugin.Cortex_services_authkey" ""
 $CAKE Admin setSetting "Plugin.Cortex_ssl_verify_peer" false
 $CAKE Admin setSetting "Plugin.Cortex_ssl_verify_host" false
 $CAKE Admin setSetting "Plugin.Cortex_ssl_allow_self_signed" true
+
+# Provisional Elastic Search tunes
+$CAKE Admin setSetting "Plugin.ElasticSearch_logging_enable" false
 
 # Various plugin sightings settings
 $CAKE Admin setSetting "Plugin.Sightings_policy" 0
@@ -522,9 +573,15 @@ $CAKE Admin setSetting "MISP.block_event_alert_tag" "no-alerts=\"true\""
 $CAKE Admin setSetting "MISP.block_old_event_alert" false
 $CAKE Admin setSetting "MISP.block_old_event_alert_age" ""
 $CAKE Admin setSetting "MISP.incoming_tags_disabled_by_default" false
+$CAKE Admin setSetting "MISP.maintenance_message" "Great things are happening! MISP is undergoing maintenance, but will return shortly. You can contact the administration at \$email. "
 $CAKE Admin setSetting "MISP.footermidleft" "This is an autogenerated VM"
 $CAKE Admin setSetting "MISP.footermidright" "Please configure accordingly and do not use in production. 3fb8269"
 $CAKE Admin setSetting "MISP.welcome_text_top" "Autogenerated VM"
+$CAKE Admin setSetting "MISP.download_attachments_on_load" true
+$CAKE Admin setSetting "MISP.title_text" "MISP"
+$CAKE Admin setSetting "MISP.terms_download" false
+$CAKE Admin setSetting "MISP.showorgalternate" false
+$CAKE Admin setSetting "MISP.event_view_filter_fields" "id, uuid, value, comment, type, category, Tag.name"
 $CAKE Admin setSetting "MISP.welcome_text_bottom" "Use for testing purposes only, production-use considered harmful."
 
 

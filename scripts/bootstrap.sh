@@ -103,11 +103,11 @@ echo "--- Installing MISP… ---"
 # sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "--- Updating packages list ---"
-sudo apt-get -qq update
+sudo apt-get -qq update > /dev/null 2>&1
 
 echo "--- Upgrading and autoremoving packages ---"
-sudo apt-get -y upgrade
-sudo apt-get -y autoremove
+sudo apt-get -y upgrade > /dev/null 2>&1
+sudo apt-get -y autoremove > /dev/null 2>&1
 
 echo "--- Install base packages ---"
 sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq > /dev/null 2>&1
@@ -184,7 +184,7 @@ echo "--- Retrieving MISP ---"
 sudo mkdir $PATH_TO_MISP
 sudo chown www-data:www-data $PATH_TO_MISP
 cd $PATH_TO_MISP
-sudo -u www-data git clone -b $MISP_BRANCH https://github.com/MISP/MISP.git $PATH_TO_MISP
+sudo -u www-data git clone -b $MISP_BRANCH https://github.com/MISP/MISP.git $PATH_TO_MISP > /dev/null 2>&1
 #git checkout tags/$(git describe --tags `git rev-list --tags --max-count=1`)
 sudo -u www-data git config core.filemode false
 # chown -R www-data $PATH_TO_MISP
@@ -195,15 +195,15 @@ sudo -u www-data git config core.filemode false
 echo "--- Installing Mitre's STIX ---"
 sudo apt-get install -y python-dev python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts
-sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git
-sudo -u www-data git clone https://github.com/STIXProject/python-stix.git
+sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git > /dev/null 2>&1
+sudo -u www-data git clone https://github.com/STIXProject/python-stix.git > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-cybox
 sudo python3 setup.py install > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-stix
 sudo python3 setup.py install > /dev/null 2>&1
 # install mixbox to accomodate the new STIX dependencies:
 cd $PATH_TO_MISP/app/files/scripts/
-sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git
+sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/mixbox
 sudo python3 setup.py install > /dev/null 2>&1
 
@@ -211,7 +211,7 @@ echo "--- Installing misp-dashboard ---"
 cd /var/www
 sudo mkdir misp-dashboard
 sudo chown www-data:www-data misp-dashboard
-sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git
+sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git > /dev/null 2>&1
 cd misp-dashboard
 sudo /var/www/misp-dashboard/install_dependencies.sh > /dev/null 2>&1
 sudo sed -i "s/^host\ =\ localhost/host\ =\ 0.0.0.0/g" /var/www/misp-dashboard/config/config.cfg
@@ -363,9 +363,9 @@ EOF
 # </VirtualHost>
 # EOF
 # activate new vhost
-sudo a2dissite default-ssl
-sudo a2ensite misp-ssl
-sudo a2ensite misp-dashboard
+sudo a2dissite default-ssl > /dev/null 2>&1
+sudo a2ensite misp-ssl > /dev/null 2>&1
+sudo a2ensite misp-dashboard > /dev/null 2>&1
 
 
 echo "--- Restarting Apache ---"
@@ -660,7 +660,6 @@ sed -i -e '$i \done\n' /etc/rc.local
 
 
 echo "--- Installing MISP modules… ---"
-mkdir /home/misp/.cache/
 sudo apt-get install -y libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
@@ -696,7 +695,8 @@ sudo pip3 install stix2 > /dev/null 2>&1
 
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
-apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar sqlite python3-pyclamd exiftool radare2 pip3 install SQLAlchemy PrettyTable python-magic > /dev/null 2>&1
+apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar-free sqlite python3-pyclamd exiftool radare2 > /dev/null 2>&1
+pip3 install SQLAlchemy PrettyTable python-magic > /dev/null 2>&1
 git clone https://github.com/viper-framework/viper.git
 cd viper
 git submodule init > /dev/null 2>&1
@@ -714,7 +714,7 @@ git clone https://github.com/MISP/mail_to_misp.git > /dev/null 2>&1
 git clone git://github.com/stricaud/faup.git faup > /dev/null 2>&1
 chown -R misp:misp faup mail_to_misp
 cd faup/build
-sudo -u misp cmake .. && sudo -u misp make > /dev/null 2>&1
+sudo -u misp cmake .. > /dev/null 2>&1 && sudo -u misp make > /dev/null 2>&1
 make install > /dev/null 2>&1
 ldconfig
 cd ../../

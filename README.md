@@ -1,6 +1,6 @@
 # Build Automated Machine Images for MISP
 
-Build a virtual machine for MISP based on Ubuntu 17.10 server
+Build a virtual machine for MISP based on Ubuntu 18.04 server
 (for VirtualBox or VMWare).
 
 ## Requirements

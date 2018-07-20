@@ -50,10 +50,10 @@
             ["modifyvm", "{{.Name}}", "--natpf1", "dashboard,tcp,,8001,0.0.0.0,8001" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "viper,tcp,,8888,0.0.0.0,8888" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "misp-modules,tcp,,1666,0.0.0.0,6666" ],
-            ["modifyvm", "{{.Name}}", "--audio", "none"]
-            ["modifyvm", "{{.Name}}", "--usb", "off"]
-            ["modifyvm", "{{.Name}}", "--vrde", "off"]
-            ["modifyvm", "{{.Name}}", "--cpus", "{{user `env cpus`}}"]
+            ["modifyvm", "{{.Name}}", "--audio", "none"],
+            ["modifyvm", "{{.Name}}", "--usb", "off"],
+            ["modifyvm", "{{.Name}}", "--vrde", "off"],
+            ["modifyvm", "{{.Name}}", "--cpus", "{{user `env cpus`}}"],
             ["modifyvm", "{{.Name}}", "--vram", "32"]
         ],
 

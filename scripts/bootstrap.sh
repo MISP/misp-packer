@@ -82,12 +82,12 @@ upload_max_filesize=50M
 post_max_size=50M
 max_execution_time=300
 memory_limit=512M
-PHP_INI='/etc/php/7.1/apache2/php.ini'
-## Starting Ubuntu 18.04 php71 is default
+PHP_INI='/etc/php/7.2/apache2/php.ini'
+## Starting Ubuntu 18.04 php72 is default
 ##vercomp 18.04 ${UBUNTU_VERSION}
 ##case $? in
-##    0) op='=';PHP_INI='/etc/php/7.1/apache2/php.ini';;
-##    1) op='>';PHP_INI='/etc/php/7.1/apache2/php.ini';;
+##    0) op='=';PHP_INI='/etc/php/7.2/apache2/php.ini';;
+##    1) op='>';PHP_INI='/etc/php/7.2/apache2/php.ini';;
 ##    2) op='<';PHP_INI='/etc/php/7.0/apache2/php.ini';;
 ##esac
 

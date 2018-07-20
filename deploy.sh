@@ -45,7 +45,9 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json
+  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json &
+
+  sleep 300
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlogi-vbox.txt"

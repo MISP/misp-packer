@@ -53,7 +53,7 @@
             ["modifyvm", "{{.Name}}", "--audio", "none"],
             ["modifyvm", "{{.Name}}", "--usb", "off"],
             ["modifyvm", "{{.Name}}", "--vrde", "off"],
-            ["modifyvm", "{{.Name}}", "--cpus", "{{user `env cpus`}}"],
+            ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpus`}}"],
             ["modifyvm", "{{.Name}}", "--vram", "32"]
         ],
 
@@ -70,7 +70,6 @@
         "http_port_min" : 9001,
         "http_port_max" : 9011,
 
-        "ssh_fullname": "{{user `ssh_fullname`}}",
         "ssh_username": "{{user `ssh_name`}}",
         "ssh_password": "{{user `ssh_pass`}}",
         "ssh_wait_timeout": "20m",
@@ -167,6 +166,7 @@
 
     "post-processors":[{
         "keep_input_artifact": "false",
+        "keep_input_artifact": false,
         "type": "checksum",
         "checksum_types": ["sha1", "sha256", "sha384", "sha512"]
     }]

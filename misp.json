@@ -33,6 +33,9 @@
         "format": "ova",
         "vm_name": "{{user `vm_name`}}",
 
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+
+
     "export_opts":
         [
             "--manifest",
@@ -100,8 +103,6 @@
         "headless": "{{user `headless`}}",
         "guest_os_type": "ubuntu-64",
         "vm_name": "{{user `vm_name`}}",
-
-        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
 
         "disk_size": "{{user `disk_size`}}",
 

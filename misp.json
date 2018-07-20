@@ -6,6 +6,11 @@
         "ssh_fullname": "misp",
         "ssh_name": "misp",
         "ssh_pass": "Password1234",
+        "iso_checksum": "73ae6579ef7c51d944a0be5c4c48f748bfd689df",
+        "iso_checksum_type": "sha1",
+        "iso_name": "ubuntu-18.04-server-amd64.iso",
+        "iso_path": "iso",
+        "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04-server-amd64.iso",
         "desktop": "false",
         "update": "true",
         "headless": "true",
@@ -23,7 +28,7 @@
 
     "builders": [{
         "type": "virtualbox-iso",
-        "headless": "true",
+        "headless": "{{user `headless`}}",
         "guest_os_type": "Ubuntu_64",
         "format": "ova",
         "vm_name": "{{user `vm_name`}}",
@@ -54,14 +59,18 @@
 
         "disk_size": "{{user `disk_size`}}",
 
-        "iso_url": "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-server-amd64.iso",
-        "iso_checksum": "8ff73f1b622276758475c3bd5190b382774626de5a82c50930519381f6c3a3f8",
-        "iso_checksum_type": "sha256",
+        "iso_checksum": "{{ user `iso_checksum` }}",
+        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+        "iso_urls": [
+            "{{ user `iso_path` }}/{{ user `iso_name` }}",
+            "{{ user `iso_url` }}"
+        ],
 
         "http_directory" : "preseeds",
         "http_port_min" : 9001,
         "http_port_max" : 9011,
 
+        "ssh_fullname": "{{user `ssh_fullname`}}",
         "ssh_username": "{{user `ssh_name`}}",
         "ssh_password": "{{user `ssh_pass`}}",
         "ssh_wait_timeout": "20m",
@@ -69,30 +78,40 @@
 
         "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
 
-        "boot_command" : [
-            "{{user `boot_command_prefix`}}",
-            "<esc><esc><enter><wait>",
+        "boot_command": [
+            "{{ user `boot_command_prefix` }}",
             "/install/vmlinuz noapic ",
+            "initrd=/install/initrd.gz ",
             "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
             "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-            "hostname={{user `hostname`}} ",
+            "hostname={{ user `hostname` }} ",
+            "grub-installer/bootdev=/dev/sda<wait> ",
             "fb=false debconf/frontend=noninteractive ",
             "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
             "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-            "initrd=/install/initrd.gz -- <enter>"
+            "passwd/user-fullname={{ user `ssh_fullname` }} ",
+            "passwd/user-password={{ user `ssh_password` }} ",
+            "passwd/user-password-again={{ user `ssh_password` }} ",
+            "passwd/username={{ user `ssh_username` }} ",
+            "-- <enter>"
         ]
     },
     {
         "type": "vmware-iso",
-        "headless": "true",
+        "headless": "{{user `headless`}}",
         "guest_os_type": "ubuntu-64",
         "vm_name": "{{user `vm_name`}}",
 
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+
         "disk_size": "{{user `disk_size`}}",
 
-        "iso_url": "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-server-amd64.iso",
-        "iso_checksum": "8ff73f1b622276758475c3bd5190b382774626de5a82c50930519381f6c3a3f8",
-        "iso_checksum_type": "sha256",
+        "iso_checksum": "{{ user `iso_checksum` }}",
+        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+        "iso_urls": [
+            "{{ user `iso_path` }}/{{ user `iso_name` }}",
+            "{{ user `iso_url` }}"
+        ],
 
         "http_directory" : "preseeds",
         "http_port_min" : 9001,

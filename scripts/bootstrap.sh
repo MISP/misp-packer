@@ -167,7 +167,7 @@ sudo a2ensite default-ssl > /dev/null 2>&1
 
 
 echo "--- Installing PHP-specific packages ---"
-sudo apt-get install -y libapache2-mod-php php php-cli php-dev php-json php-mysql php-opcache php-readline php-redis php-xml > /dev/null 2>&1
+sudo apt-get install -y libapache2-mod-php php php-cli php-dev php-mbstring php-json php-mysql php-opcache php-readline php-redis php-xml > /dev/null 2>&1
 
 echo "--- Configuring PHP ---"
 for key in upload_max_filesize post_max_size max_execution_time max_input_time memory_limit

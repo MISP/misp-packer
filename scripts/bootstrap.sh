@@ -723,6 +723,12 @@ cd mail_to_misp
 pip3 install -r requirements.txt > /dev/null 2>&1
 sudo -u misp cp mail_to_misp_config.py-example mail_to_misp_config.py
 
+echo "--- Installing vbox guest additions ---"
+apt-get install -y dkms virtualbox-guest-additions-iso virtualbox-guest-dkms > /dev/null 2>&1
+mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /mnt
+yes|sh /mnt/VBoxLinuxAdditions.run
+umount /mnt
+
 echo "--- Generating Certificate ---"
 openssl req -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=LU/ST=/L=Luxembourg/O=CIRCL/OU=VM AutoGen/CN=localhost/emailAddress=admin@admin.test" -keyout /etc/ssl/private/misp.local.key -out /etc/ssl/private/misp.local.crt > /dev/null 2>&1
 

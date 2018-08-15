@@ -701,6 +701,7 @@ git clone https://github.com/viper-framework/viper.git
 cd viper
 git submodule init > /dev/null 2>&1
 git submodule update > /dev/null 2>&1
+wget -O requirements-web.txt https://raw.githubusercontent.com/SteveClement/viper/56585c97cf236ef4b2f202c55e4c1148b856ed04/requirements-web.txt > /dev/null 2>&1
 pip3 install -r requirements.txt > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &

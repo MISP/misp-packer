@@ -52,6 +52,7 @@
             ["modifyvm", "{{.Name}}", "--natpf1", "https,tcp,,8443,,443" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "dashboard,tcp,,8001,0.0.0.0,8001" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "viper,tcp,,8888,0.0.0.0,8888" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "jupyter-notebook,tcp,,8889,0.0.0.0,8889" ],
             ["modifyvm", "{{.Name}}", "--natpf1", "misp-modules,tcp,,1666,0.0.0.0,6666" ],
             ["modifyvm", "{{.Name}}", "--audio", "none"],
             ["modifyvm", "{{.Name}}", "--usb", "off"],

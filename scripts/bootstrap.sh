@@ -130,6 +130,7 @@ sudo systemctl restart mariadb.service
 sleep 10
 sudo apt-get install -y expect > /dev/null 2>&1
 ## do we need to spawn mysql_secure_install with sudo in future?
+# If yes, see here: https://stackoverflow.com/a/52961331/610224
 expect -f - <<-EOF
   set timeout 10
   spawn mysql_secure_installation

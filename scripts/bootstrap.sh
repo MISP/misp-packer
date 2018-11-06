@@ -110,7 +110,7 @@ sudo apt-get -y upgrade > /dev/null 2>&1
 sudo apt-get -y autoremove > /dev/null 2>&1
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate jupyter-notebook > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -781,6 +781,11 @@ sudo sed -i "s/^misp_key\ =\ 'YOUR_KEY_HERE'/misp_key\ =\ '$AUTH_KEY'/g" /usr/lo
 echo "--- Installing asciidoctor-pdf ---"
 gem install asciidoctor-pdf --pre > /dev/null 2>&1
 gem install pygments.rb > /dev/null 2>&1
+
+echo "--- Setting up jupyter notebook ---"
+sudo pip3 install jupyter
+echo $AUTH_KEY > $PATH_TO_MISP/PyMISP/docs/tutorial/apikey
+sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /usr/local/bin/jupyter-notebook --port=8889 --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.notebook_dir=/var/www/MISP/PyMISP/docs/tutorial/ > /tmp/jupyter_rc.local.log &\n' /etc/rc.local
 
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP

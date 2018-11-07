@@ -785,7 +785,7 @@ gem install pygments.rb > /dev/null 2>&1
 echo "--- Setting up jupyter notebook ---"
 sudo pip3 install jupyter
 echo $AUTH_KEY > $PATH_TO_MISP/PyMISP/docs/tutorial/apikey
-sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /usr/local/bin/jupyter-notebook --port=8889 --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.notebook_dir=/var/www/MISP/PyMISP/docs/tutorial/ > /tmp/jupyter_rc.local.log &\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /usr/local/bin/jupyter-notebook --port=8889 --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.notebook_dir=/var/www/MISP/PyMISP/docs/tutorial/ --NotebookApp.iopub_data_rate_limit=0 > /tmp/jupyter_rc.local.log &\n' /etc/rc.local
 
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP

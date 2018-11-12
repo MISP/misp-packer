@@ -671,7 +671,7 @@ sudo pip3 install -I . > /dev/null 2>&1
 sudo pip3 install lief 2>&1
 sudo pip3 install maec 2>&1
 sudo pip3 install pathlib 2>&1
-sudo pip3 install pymisp python-magic wand yara > /dev/null 2>&1
+sudo pip3 install pymisp python-magic wand > /dev/null 2>&1
 sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
 sudo pip3 install stix2 > /dev/null 2>&1

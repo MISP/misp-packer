@@ -6,9 +6,9 @@
         "desktop": "false",
         "disk_size": "25000",
         "headless": "true",
+        "hostname": "misp",
         "http_proxy": "{{env `http_proxy`}}",
         "https_proxy": "{{env `https_proxy`}}",
-        "hostname": "misp",
         "iso_checksum": "87bedd68607f059ca973f86346bbdf1caa6e1077",
         "iso_checksum_type": "sha1",
         "iso_name": "ubuntu-18.04.1-server-amd64.iso",
@@ -22,13 +22,14 @@
         "ssh_name": "misp",
         "ssh_pass": "Password1234",
         "update": "true",
-        "vm_version": "2.4",
         "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
-        "vm_name": "MISP_demo"
+        "vm_name": "MISP_demo",
+        "vm_version": "2.4"
     },
 
     "builders": [{
         "disk_size": "{{user `disk_size`}}",
+        "format": "ova",
         "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
         "guest_os_type": "Ubuntu_64",
         "hard_drive_interface": "sata",
@@ -42,15 +43,13 @@
             "{{ user `iso_path` }}/{{ user `iso_name` }}",
             "{{ user `iso_url` }}"
         ],
-        "type": "virtualbox-iso",
-        "format": "ova",
-        "vm_name": "{{user `vm_name`}}",
         "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
         "ssh_username": "{{user `ssh_name`}}",
         "ssh_password": "{{user `ssh_pass`}}",
         "ssh_wait_timeout": "20m",
         "ssh_pty" : "true",
-
+        "type": "virtualbox-iso",
+        "vm_name": "{{user `vm_name`}}",
 
         "export_opts":
              [
@@ -109,11 +108,11 @@
             "{{ user `iso_url` }}"
         ],
         "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+        "skip_compaction": false,
         "ssh_username": "{{user `ssh_name`}}",
         "ssh_password": "{{user `ssh_pass`}}",
-        "ssh_wait_timeout": "20m",
         "ssh_pty" : "true",
-        "skip_compaction": false,
+        "ssh_wait_timeout": "20m",
         "type": "vmware-iso",
         "vm_name": "{{user `vm_name`}}",
         "vmx_data": {

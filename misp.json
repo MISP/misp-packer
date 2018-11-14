@@ -2,48 +2,64 @@
     "_comment": "MISP VM Autogen packer build system",
     "variables": {
         "boot_command_prefix": "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-        "preseed":"preseed.cfg",
-        "ssh_fullname": "misp",
-        "ssh_name": "misp",
-        "ssh_pass": "Password1234",
+        "cpus": "1",
+        "desktop": "false",
+        "disk_size": "25000",
+        "headless": "true",
+        "http_proxy": "{{env `http_proxy`}}",
+        "https_proxy": "{{env `https_proxy`}}",
+        "hostname": "misp",
         "iso_checksum": "87bedd68607f059ca973f86346bbdf1caa6e1077",
         "iso_checksum_type": "sha1",
         "iso_name": "ubuntu-18.04.1-server-amd64.iso",
         "iso_path": "iso",
         "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.1-server-amd64.iso",
-        "desktop": "false",
-        "update": "true",
-        "headless": "true",
+        "memory": "2048",
         "no_proxy": "{{env `no_proxy`}}",
-        "http_proxy": "{{env `http_proxy`}}",
-        "https_proxy": "{{env `https_proxy`}}",
-        "hostname": "misp",
+        "ovftool_path": "ovftool",
+        "preseed":"preseed.cfg",
+        "ssh_fullname": "misp",
+        "ssh_name": "misp",
+        "ssh_pass": "Password1234",
+        "update": "true",
         "vm_version": "2.4",
         "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
-        "vm_name": "MISP_demo",
-        "disk_size": "25000",
-        "memory": "2048",
-        "cpus": "1"
+        "vm_name": "MISP_demo"
     },
 
     "builders": [{
-        "type": "virtualbox-iso",
-        "headless": "{{user `headless`}}",
+        "disk_size": "{{user `disk_size`}}",
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
         "guest_os_type": "Ubuntu_64",
+        "hard_drive_interface": "sata",
+        "headless": "{{user `headless`}}",
+        "http_directory" : "preseeds",
+        "http_port_min" : 9001,
+        "http_port_max" : 9011,
+        "iso_checksum": "{{ user `iso_checksum` }}",
+        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+        "iso_urls": [
+            "{{ user `iso_path` }}/{{ user `iso_name` }}",
+            "{{ user `iso_url` }}"
+        ],
+        "type": "virtualbox-iso",
         "format": "ova",
         "vm_name": "{{user `vm_name`}}",
+        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+        "ssh_username": "{{user `ssh_name`}}",
+        "ssh_password": "{{user `ssh_pass`}}",
+        "ssh_wait_timeout": "20m",
+        "ssh_pty" : "true",
 
-        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
 
-
-    "export_opts":
-        [
-            "--manifest",
-            "--vsys", "0",
-            "--eulafile", "/tmp/LICENSE-misp",
-            "--description", "{{user `vm_description`}}",
-            "--version", "{{user `vm_version`}}"
-        ],
+        "export_opts":
+             [
+                "--manifest",
+                "--vsys", "0",
+            "    --eulafile", "/tmp/LICENSE-misp",
+                "--description", "{{user `vm_description`}}",
+                "--version", "{{user `vm_version`}}"
+             ],
 
         "vboxmanage": [
             ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
@@ -60,28 +76,6 @@
             ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpus`}}"],
             ["modifyvm", "{{.Name}}", "--vram", "32"]
         ],
-
-        "disk_size": "{{user `disk_size`}}",
-
-        "hard_drive_interface": "sata",
-
-        "iso_checksum": "{{ user `iso_checksum` }}",
-        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
-        "iso_urls": [
-            "{{ user `iso_path` }}/{{ user `iso_name` }}",
-            "{{ user `iso_url` }}"
-        ],
-
-        "http_directory" : "preseeds",
-        "http_port_min" : 9001,
-        "http_port_max" : 9011,
-
-        "ssh_username": "{{user `ssh_name`}}",
-        "ssh_password": "{{user `ssh_pass`}}",
-        "ssh_wait_timeout": "20m",
-        "ssh_pty" : "true",
-
-        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
 
         "boot_command": [
             "{{ user `boot_command_prefix` }}",
@@ -102,31 +96,26 @@
         ]
     },
     {
-        "type": "vmware-iso",
-        "headless": "{{user `headless`}}",
-        "guest_os_type": "ubuntu-64",
-        "vm_name": "{{user `vm_name`}}",
-
         "disk_size": "{{user `disk_size`}}",
-
+        "guest_os_type": "ubuntu-64",
+        "headless": "{{user `headless`}}",
+        "http_directory" : "preseeds",
+        "http_port_min" : 9001,
+        "http_port_max" : 9011,
         "iso_checksum": "{{ user `iso_checksum` }}",
         "iso_checksum_type": "{{ user `iso_checksum_type` }}",
         "iso_urls": [
             "{{ user `iso_path` }}/{{ user `iso_name` }}",
             "{{ user `iso_url` }}"
         ],
-
-        "http_directory" : "preseeds",
-        "http_port_min" : 9001,
-        "http_port_max" : 9011,
-
+        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
         "ssh_username": "{{user `ssh_name`}}",
         "ssh_password": "{{user `ssh_pass`}}",
         "ssh_wait_timeout": "20m",
         "ssh_pty" : "true",
-
-        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
-
+        "skip_compaction": false,
+        "type": "vmware-iso",
+        "vm_name": "{{user `vm_name`}}",
         "vmx_data": {
             "memsize": "{{user `memory`}}"
         },
@@ -141,9 +130,7 @@
             "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
             "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
             "initrd=/install/initrd.gz -- <enter>"
-        ],
-
-        "skip_compaction": false
+        ]
     }
 	],
 

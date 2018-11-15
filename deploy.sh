@@ -67,6 +67,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
   # Create the latest MISP export directory
   ssh ${REL_USER}@${REL_SERVER} mkdir -p export/MISP_${VER}@${LATEST_COMMIT}
+  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/MISP_${VER}@${LATEST_COMMIT}/checksums
 
   # Sign and transfer files
   for FILE in ${FILE_LIST}; do
@@ -75,8 +76,10 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
     rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
     ssh ${REL_USER}@${REL_SERVER} rm export/latest
     ssh ${REL_USER}@${REL_SERVER} ln -s MISP_${VER}@${LATEST_COMMIT} export/latest
-    ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
   done
+  ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
+  ssh ${REL_USER}@${REL_SERVER} mv export/MISP_${VER}@${LATEST_COMMIT}/*.checksum* export/MISP_${VER}@${LATEST_COMMIT}/checksums
+  ssh ${REL_USER}@${REL_SERVER} mv export/MISP_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/MISP_${VER}@${LATEST_COMMIT}/checksums
 
   ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "MISP VM Images" -H https://www.circl.lu/misp-images/ -o index.html
 

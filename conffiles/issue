@@ -1,0 +1,28 @@
+Ubuntu 18.04.1 LTS \n \l
+
+Welcome to the MISP Threat Sharing VM.
+---
+
+IP address: \4{eth0}
+
+---
+
+MISP                http://\4{eth0}       admin@admin.test / admin
+                    https://\4{eth0}
+MISP-modules (API)  http://\4{eth0}:6666  (no credentials)
+MISP-dashboard      http://\4{eth0}:8001  (no credentials)
+Viper-web           http://\4{eth0}:8888  admin / Password1234
+jupyter-notebook    http://\4{eth0}:8889
+
+The default system credentials are: misp / Password1234
+
+On VirtualBox port-forwarding from your host to the guest is in place.
+Below are the forwards as we need to use ports >1024 for some.
+
+MISP         -> 8080 and :8443
+ssh          -> 2222
+misp-modules -> 1666
+
+If this fails, make sure the host machine is not occupying one of the forwarded ports or a firewall is active.
+
+----

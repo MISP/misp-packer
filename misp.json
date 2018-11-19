@@ -150,9 +150,30 @@
     {
         "type": "shell",
         "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "script": "scripts/users.sh"
+    },
+    {
+        "type": "shell",
+        "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "script": "scripts/interfaces.sh"
+    },
+    {
+        "type": "shell",
+        "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
         "script": "scripts/bootstrap.sh",
         "pause_before": "10s"
-    }],
+    },
+    {
+        "type": "file",
+        "source" : "conffiles/issue",
+        "destination": "/tmp/issue"
+    },
+    {
+        "type": "shell",
+        "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "script": "scripts/clean.sh"
+    }
+    ],
 
     "post-processors":[{
         "keep_input_artifact": "false",

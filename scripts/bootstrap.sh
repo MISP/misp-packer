@@ -94,14 +94,6 @@ PHP_INI='/etc/php/7.2/apache2/php.ini'
 
 echo "--- Installing MISP… ---"
 
-# echo "--- Configuring GRUB ---"
-#
-# for key in GRUB_CMDLINE_LINUX
-# do
-#     sudo sed -i "s/^\($key\)=.*/\1=\"$(eval echo \${$key})\"/" $DEFAULT_GRUB
-# done
-# sudo grub-mkconfig -o /boot/grub/grub.cfg
-
 echo "--- Updating packages list ---"
 sudo apt-get -qq update > /dev/null 2>&1
 
@@ -789,9 +781,6 @@ sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /usr/local/bin/jupy
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP
 sudo -u www-data git submodule foreach --recursive git config core.filemode false > /dev/null 2>&1
-
-echo "--- autoremove for apt ---"
-apt-get autoremove > /dev/null 2>&1
 
 echo "--- Setting Baseurl and making sure Sessions do NOT auto regenerate ---"
 $CAKE Baseurl "" > /dev/null 2>&1

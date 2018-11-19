@@ -55,7 +55,7 @@
              [
                 "--manifest",
                 "--vsys", "0",
-            "    --eulafile", "/tmp/LICENSE-misp",
+                "--eulafile", "/tmp/LICENSE-misp",
                 "--description", "{{user `vm_description`}}",
                 "--version", "{{user `vm_version`}}"
              ],

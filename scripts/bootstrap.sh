@@ -102,7 +102,7 @@ sudo apt-get -y upgrade > /dev/null 2>&1
 sudo apt-get -y autoremove > /dev/null 2>&1
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate jupyter-notebook > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"

@@ -102,7 +102,7 @@ sudo apt-get -y upgrade > /dev/null 2>&1
 sudo apt-get -y autoremove > /dev/null 2>&1
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper virtualenv zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
 
 
 echo "--- Installing and configuring Postfix ---"
@@ -184,6 +184,12 @@ sudo -u www-data git config core.filemode false
 # chgrp -R www-data $PATH_TO_MISP
 # chmod -R 700 $PATH_TO_MISP
 
+echo "--- Creating a python3 virtualenv in /var/www/MISP/venv ---
+sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+
+# make pip happy
+sudo mkdir /var/www/.cache/
+sudo chown www-data:www-data /var/www/.cache
 
 echo "--- Installing Mitre's STIX ---"
 sudo apt-get install -y python-dev python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev python-setuptools > /dev/null 2>&1

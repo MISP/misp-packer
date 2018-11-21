@@ -104,7 +104,6 @@ sudo apt-get -y autoremove > /dev/null 2>&1
 echo "--- Install base packages ---"
 sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper virtualenv zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
 
-
 echo "--- Installing and configuring Postfix ---"
 # # Postfix Configuration: Satellite system
 # # change the relay server later with:
@@ -197,14 +196,14 @@ cd $PATH_TO_MISP/app/files/scripts
 sudo -u www-data git clone https://github.com/CybOXProject/python-cybox.git > /dev/null 2>&1
 sudo -u www-data git clone https://github.com/STIXProject/python-stix.git > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-cybox
-sudo python3 setup.py install > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install . > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/python-stix
-sudo python3 setup.py install > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install . > /dev/null 2>&1
 # install mixbox to accomodate the new STIX dependencies:
 cd $PATH_TO_MISP/app/files/scripts/
 sudo -u www-data git clone https://github.com/CybOXProject/mixbox.git > /dev/null 2>&1
 cd $PATH_TO_MISP/app/files/scripts/mixbox
-sudo python3 setup.py install > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install . > /dev/null 2>&1
 
 echo "--- Installing misp-dashboard ---"
 cd /var/www
@@ -664,15 +663,12 @@ cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 # pip3 install
-sudo pip3 install -I -r REQUIREMENTS > /dev/null 2>&1
-sudo pip3 install -I . > /dev/null 2>&1
-sudo pip3 install lief 2>&1
-sudo pip3 install maec 2>&1
-sudo pip3 install pathlib 2>&1
-sudo pip3 install pymisp python-magic wand > /dev/null 2>&1
-sudo pip3 install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I -r REQUIREMENTS > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I . > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install lief maec pathlib pymisp python-magic wand > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
-sudo pip3 install stix2 > /dev/null 2>&1
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install stix2 > /dev/null 2>&1
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]
@@ -695,13 +691,16 @@ sudo pip3 install stix2 > /dev/null 2>&1
 echo "--- Installing viper-framework ---"
 cd /usr/local/src/
 apt-get install -y libssl-dev swig python3-ssdeep p7zip-full unrar-free sqlite python3-pyclamd exiftool radare2 > /dev/null 2>&1
-pip3 install SQLAlchemy PrettyTable python-magic > /dev/null 2>&1
 git clone https://github.com/viper-framework/viper.git
 cd viper
-git submodule init > /dev/null 2>&1
-git submodule update > /dev/null 2>&1
+virtualenv -p python3 venv > /dev/null 2>&1
+git submodule update --init --recursive > /dev/null 2>&1
+./venv/bin/pip install scrapy SQLAlchemy PrettyTable python-magic > /dev/null 2>&1
+./venv/bin/pip install -r requirements.txt > /dev/null 2>&1
+sed -i '1 s/^.*$/\#!\/usr\/local\/src\/viper\/venv\/bin\/python/' viper-cli
+sed -i '1 s/^.*$/\#!\/usr\/local\/src\/viper\/venv\/bin\/python/' viper-web
 wget -O requirements-web.txt https://raw.githubusercontent.com/SteveClement/viper/56585c97cf236ef4b2f202c55e4c1148b856ed04/requirements-web.txt > /dev/null 2>&1
-pip3 install -r requirements.txt > /dev/null 2>&1
+./venv/bin/pip install -r requirements-web.txt > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-cli -h > /dev/null 2>&1
 sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 &
 echo 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/src/viper"' |sudo tee /etc/environment
@@ -718,7 +717,8 @@ make install > /dev/null 2>&1
 ldconfig
 cd ../../
 cd mail_to_misp
-pip3 install -r requirements.txt > /dev/null 2>&1
+virtualenv -p python3 venv > /dev/null 2>&1
+./venv/bin/pip install -r requirements.txt > /dev/null 2>&1
 sudo -u misp cp mail_to_misp_config.py-example mail_to_misp_config.py
 
 echo "--- Installing vbox guest additions ---"
@@ -762,6 +762,9 @@ curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --h
 ##sudo $CAKE Admin updateObjectTemplates
 curl --header "Authorization: $AUTH_KEY" --header "Accept: application/json" --header "Content-Type: application/json" -o /dev/null -s -X POST http://127.0.0.1/objectTemplates/update > /dev/null 2>&1
 
+# Set python virtualenenv to be used
+$CAKE Admin setSetting "MISP.python_bin" "${PATH_TO_MISP}/venv/bin/python" > /dev/null 2>&1
+
 echo "--- Enabling MISP new pub/sub feature (ZeroMQ)… ---"
 sudo apt-get install -y pkg-config python-redis python-zmq python3-zmq > /dev/null 2>&1
 
@@ -780,10 +783,10 @@ gem install asciidoctor-pdf --pre > /dev/null 2>&1
 gem install pygments.rb > /dev/null 2>&1
 
 echo "--- Setting up jupyter notebook ---"
-sudo apt purge -f jupyter-notebook  # Do not remove that, we *do not want* the system version
-sudo pip3 install -I -U jupyter  # Force everything to the latest version
+sudo apt purge -f jupyter-notebook -y # Do not remove this purge, we *do not want* the system version
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I -U jupyter
 echo $AUTH_KEY > $PATH_TO_MISP/PyMISP/docs/tutorial/apikey
-sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /usr/local/bin/jupyter-notebook --port=8889 --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.notebook_dir=/var/www/MISP/PyMISP/docs/tutorial/ --NotebookApp.iopub_data_rate_limit=0 > /tmp/jupyter_rc.local.log &\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data HOME="/var/www/MISP/PyMISP/" /var/www/MISP/venv/bin/jupyter-notebook --port=8889 --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.notebook_dir=/var/www/MISP/PyMISP/docs/tutorial/ --NotebookApp.iopub_data_rate_limit=0 > /tmp/jupyter_rc.local.log &\n' /etc/rc.local
 
 echo "--- Ignoring filemode on all submodules ---"
 cd $PATH_TO_MISP

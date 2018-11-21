@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
-cp /tmp/issue /etc/issue
+mv /tmp/issue /etc/issue
+mv /tmp/crontab /etc/cron.d/misp
 
 # package
 echo "--- autoremove for apt ---"
@@ -10,5 +11,6 @@ echo "--- Cleaning packages"
 apt-get -y clean > /dev/null 2>&1
 
 # End Cleaning
-echo "VM cleaned"
+echo "VM cleaned and rebooting for automagic reas0ns."
+reboot
 

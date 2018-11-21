@@ -165,13 +165,20 @@
     },
     {
         "type": "file",
+        "source" : "conffiles/crontab",
+        "destination": "/tmp/crontab"
+    },
+    {
+        "type": "file",
         "source" : "conffiles/issue",
         "destination": "/tmp/issue"
     },
     {
         "type": "shell",
         "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
-        "script": "scripts/clean.sh"
+        "script": "scripts/clean.sh",
+        "expect_disconnect": "true",
+        "pause_before": "30s"
     }
     ],
 

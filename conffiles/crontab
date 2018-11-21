@@ -1,0 +1,6 @@
+### Very early stage crontab. This will completed soon(tm)
+#@daily /var/www/MISP/app/Console/cake Server pull [user_id] [server_id] [full|update]
+#@monthly /var/www/MISP/app/Console/cake Server push [user_id] [server_id]
+#@hourly /var/www/MISP/app/Console/cake Server fetchFeed [user_id] [feed_id|all|csv|text|misp]
+#@weekly /var/www/MISP/app/Console/cake Server cacheFeed [user_id] [feed_id|all|csv|text|misp]
+#@daily /var/www/MISP/app/Console/cake Event enrichEvent [user_id] [event_id] [json_encoded_module_list]

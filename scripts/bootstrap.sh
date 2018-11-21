@@ -183,7 +183,7 @@ sudo -u www-data git config core.filemode false
 # chgrp -R www-data $PATH_TO_MISP
 # chmod -R 700 $PATH_TO_MISP
 
-echo "--- Creating a python3 virtualenv in /var/www/MISP/venv ---
+echo "--- Creating a python3 virtualenv in /var/www/MISP/venv ---"
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 
 # make pip happy

@@ -744,6 +744,7 @@ sleep 5
 echo "--- Updating the galaxies… ---"
 sudo -E $PATH_TO_MISP/app/Console/cake userInit -q > /dev/null
 AUTH_KEY=$(mysql -u $DBUSER_MISP -p$DBPASSWORD_MISP misp -e "SELECT authkey FROM users;" | tail -1)
+echo ${AUTH_KEY} > /tmp/AUTH_KEY.txt
 # Update the galaxies…
 $CAKE Admin updateGalaxies > /dev/null 2>&1
 

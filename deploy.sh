@@ -7,23 +7,48 @@ TIME_START=$(date +%s)
 VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
 LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
-# Update time-stamp and make sure file exists
-touch /tmp/misp-latest.sha
+
+if [ "${VER}" -eq "" ] || [ "${LATEST_COMMIT}" -eq "" ] ; then
+  echo "Somehow, could not 'curl' either a version or a commit tag, exiting -1..."
+  exit -1
+fi
+
 # SHAsums to be computed
 SHA_SUMS="1 256 384 512"
 
+PACKER_NAME="misp"
+PACKER_VM="MISP"
+NAME="misp-packer"
+
+# Update time-stamp and make sure file exists
+touch /tmp/${PACKER_NAME}-latest.sha
+
 # Configure your user and remote server
-REL_USER="misp-release"
+REMOTE=1
+REL_USER="${PACKER_NAME}-release"
 REL_SERVER="cpab"
 
+# GPG Sign
+GPG_ENABLED=0
+GPG_KEY="0x9BE4AEE9"
+
+# Enable debug for packer, omit -debug to disable
+##PACKER_DEBUG="-debug"
+
 # Enable logging for packer
-PACKER_LOG=1
+export PACKER_LOG=1
 
 # Make sure we have a current work directory
 PWD=`pwd`
 
+# Make sure log dir exists (-p quiets if exists)
+mkdir -p ${PWD}/log
+
+vm_description='MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.'
+vm_version='2.4'
+
 # Fetching latest MISP LICENSE
-/usr/bin/wget -q -O /tmp/LICENSE-misp https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
+/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
 # Place holder, this fn() should be used to anything signing related
 function signify()
@@ -34,6 +59,24 @@ if [ -z "$1" ]; then
 fi
 
 }
+
+function removeAll()
+{
+  # Remove files for next run
+  rm -r output-virtualbox-iso
+  rm -r output-vmware-iso
+  rm *.checksum *.zip *.sha*
+  rm ${PACKER_NAME}-deploy.json
+  rm packer_virtualbox-iso_virtualbox-iso_sha1.checksum.asc
+  rm packer_virtualbox-iso_virtualbox-iso_sha256.checksum.asc
+  rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
+  rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
+  rm AIL${VER}@${LATEST_COMMIT}-vmware.zip.asc
+  rm /tmp/LICENSE-${PACKER_NAME}
+}
+
+# TODO: Make it more graceful if files do not exist
+removeAll
 
 # Check if latest build is still up to date, if not, roll and deploy new
 if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
@@ -50,7 +93,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   sleep 300
 
   # Build virtualbox VM set
-  PACKER_LOG_PATH="${PWD}/packerlogi-vbox.txt"
+  PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
   /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json
 
   # ZIPup all the vmware stuff

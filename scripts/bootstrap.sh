@@ -668,7 +668,8 @@ sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I . > /dev/null 2>&1
 sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install lief maec pathlib pymisp python-magic wand > /dev/null 2>&1
 sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install git+https://github.com/kbandla/pydeep.git > /dev/null 2>&1
 # install STIX2.0 library to support STIX 2.0 export:
-sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install stix2 > /dev/null 2>&1
+cd ${PATH_TO_MISP}/cti-python-stix2
+sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I . > /dev/null 2>&1
 # With systemd:
 # sudo cat > /etc/systemd/system/misp-modules.service  <<EOF
 # [Unit]

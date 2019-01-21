@@ -8,7 +8,7 @@ VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name'
 # Latest commit hash of misp
 LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
 
-if [ "${VER}" -eq "" ] || [ "${LATEST_COMMIT}" -eq "" ] ; then
+if [ "${VER}" == "" ] || [ "${LATEST_COMMIT}" == "" ] ; then
   echo "Somehow, could not 'curl' either a version or a commit tag, exiting -1..."
   exit -1
 fi
@@ -47,14 +47,11 @@ mkdir -p ${PWD}/log
 vm_description='MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.'
 vm_version='2.4'
 
-# Fetching latest MISP LICENSE
-/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
-
 # Place holder, this fn() should be used to anything signing related
 function signify()
 {
 if [ -z "$1" ]; then
-  echo "This function needs an arguments"
+  echo "This function needs an argument"
   exit 1
 fi
 
@@ -71,20 +68,23 @@ function removeAll()
   rm packer_virtualbox-iso_virtualbox-iso_sha256.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
   rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
-  rm AIL${VER}@${LATEST_COMMIT}-vmware.zip.asc
+  rm ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.asc
   rm /tmp/LICENSE-${PACKER_NAME}
 }
 
 # TODO: Make it more graceful if files do not exist
-removeAll
+removeAll 2> /dev/null
+
+# Fetching latest MISP LICENSE
+/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
 # Check if latest build is still up to date, if not, roll and deploy new
 if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
-  echo "Current MISP version is: ${VER}@${LATEST_COMMIT}"
+  echo "Current ${PACKER_VM} version is: ${VER}@${LATEST_COMMIT}"
 
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
-  cat misp.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"MISP_${VER}@${LATEST_COMMIT}\",|" > misp-deploy.json
+  cat misp.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT}\",|" > misp-deploy.json
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
@@ -97,51 +97,42 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json
 
   # ZIPup all the vmware stuff
-  zip -r MISP_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
+  zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
 
   # Create a hashfile for the zip
   for SUMsize in `echo ${SHA_SUMS}`; do
-    shasum -a ${SUMsize} *.zip > MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha${SUMsize}
+    shasum -a ${SUMsize} *.zip > ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha${SUMsize}
   done
 
 
   # Current file list of everything to gpg sign and transfer
-  FILE_LIST="MISP_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/MISP_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 MISP_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
+  FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
 
   # Create the latest MISP export directory
-  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/MISP_${VER}@${LATEST_COMMIT}
-  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/MISP_${VER}@${LATEST_COMMIT}/checksums
+  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
 
   # Sign and transfer files
   for FILE in ${FILE_LIST}; do
     gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
-    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
-    rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/MISP_${VER}@${LATEST_COMMIT}
+    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+    rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
     ssh ${REL_USER}@${REL_SERVER} rm export/latest
-    ssh ${REL_USER}@${REL_SERVER} ln -s MISP_${VER}@${LATEST_COMMIT} export/latest
+    ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
   done
   ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
-  ssh ${REL_USER}@${REL_SERVER} mv export/MISP_${VER}@${LATEST_COMMIT}/*.checksum* export/MISP_${VER}@${LATEST_COMMIT}/checksums
-  ssh ${REL_USER}@${REL_SERVER} mv export/MISP_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/MISP_${VER}@${LATEST_COMMIT}/checksums
+  ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+  ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
 
-  ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "MISP VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+  ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
 
   # Remove files for next run
-  rm -r output-virtualbox-iso
-  rm -r output-vmware-iso
-  rm *.checksum *.zip *.sha*
-  rm misp-deploy.json
-  rm packer_virtualbox-iso_virtualbox-iso_sha1.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha256.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
-  rm MISP_${VER}@${LATEST_COMMIT}-vmware.zip.asc
-  rm /tmp/LICENSE-misp
+  removeAll 2> /dev/null
   echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
 
   echo "The generation took ${TIME_DELTA} seconds"
 else
-  echo "Current MISP version ${VER}@${LATEST_COMMIT} is up to date."
+  echo "Current ${PACKER_VM} version ${VER}@${LATEST_COMMIT} is up to date."
 fi

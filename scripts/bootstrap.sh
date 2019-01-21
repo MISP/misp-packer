@@ -102,7 +102,8 @@ sudo apt-get -y upgrade > /dev/null 2>&1
 sudo apt-get -y autoremove > /dev/null 2>&1
 
 echo "--- Install base packages ---"
-sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper virtualenv zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate mailutils > /dev/null 2>&1
+sudo apt-get -y install curl net-tools gcc git gnupg-agent make python openssl redis-server sudo tmux vim virtualenvwrapper virtualenv zip python3-pythonmagick tesseract-ocr htop imagemagick asciidoctor jq ntp ntpdate > /dev/null 2>&1
+## Remove mailutils, it probably makes the script stuck on a user prompt....
 
 echo "--- Installing and configuring Postfix ---"
 # # Postfix Configuration: Satellite system

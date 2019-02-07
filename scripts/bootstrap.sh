@@ -653,7 +653,7 @@ sed -i -e '$i \for d in $git_dirs; do\n' /etc/rc.local
 sed -i -e '$i \    echo "Updating ${d}" >> /tmp/git-update_rc.local.log\n' /etc/rc.local
 sed -i -e '$i \    cd $d && sudo git pull  >> /tmp/git-update_rc.local.log &\n' /etc/rc.local
 sed -i -e '$i \done\n' /etc/rc.local
-sed -i -e '$i \sudo -u www-data misp-modules -l 0.0.0.0 -s > /tmp/misp-modules_rc.local.log 2> /dev/null &\n' /etc/rc.local
+sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 0.0.0.0 -s > /tmp/misp-modules_rc.local.log 2> /dev/null &\n' /etc/rc.local
 sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh > /tmp/misp-dashboard_rc.local.log\n' /etc/rc.local
 sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 > /tmp/viper-web_rc.local.log &\n' /etc/rc.local
 
@@ -662,6 +662,7 @@ echo "--- Installing MISP modules… ---"
 sudo apt-get install -y libpq5 libjpeg-dev libfuzzy-dev > /dev/null 2>&1
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
+sudo chown -R www-data:www-data misp-modules
 cd misp-modules
 # pip3 install
 sudo -H -u www-data ${PATH_TO_MISP}/venv/bin/pip install -I -r REQUIREMENTS > /dev/null 2>&1

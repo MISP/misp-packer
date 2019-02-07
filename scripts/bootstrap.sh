@@ -818,6 +818,10 @@ chmod 700 $PATH_TO_MISP/.gnupg
 chown -R misp:misp ~misp/.viper
 chown misp:misp ~/mysql.txt
 
+# Install Crypt_GPG and Console_CommandLine
+sudo pear install ${PATH_TO_MISP}/INSTALL/dependencies/Console_CommandLine/package.xml 2>&1
+sudo pear install ${PATH_TO_MISP}/INSTALL/dependencies/Crypt_GPG/package.xml 2>&1
+
 TIME_END=$(date +%s)
 TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
 

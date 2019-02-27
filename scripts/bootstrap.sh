@@ -210,6 +210,7 @@ echo "--- Installing misp-dashboard ---"
 cd /var/www
 sudo mkdir misp-dashboard
 sudo chown www-data:www-data misp-dashboard
+sudo chmod g+w misp-dashboard
 sudo -u www-data git clone https://github.com/MISP/misp-dashboard.git > /dev/null 2>&1
 cd misp-dashboard
 sudo /var/www/misp-dashboard/install_dependencies.sh > /dev/null 2>&1
@@ -655,6 +656,7 @@ sed -i -e '$i \    cd $d && sudo git pull  >> /tmp/git-update_rc.local.log &\n' 
 sed -i -e '$i \done\n' /etc/rc.local
 sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 0.0.0.0 -s > /tmp/misp-modules_rc.local.log 2> /dev/null &\n' /etc/rc.local
 sed -i -e '$i \sudo -u www-data bash /var/www/misp-dashboard/start_all.sh > /tmp/misp-dashboard_rc.local.log\n' /etc/rc.local
+sed -i -e '$i \sudo -u zmqs bash /var/www/misp-dashboard/start_zmq.sh > /tmp/misp-dashboard_zmq_rc.local.log\n' /etc/rc.local
 sed -i -e '$i \sudo -u misp /usr/local/src/viper/viper-web -p 8888 -H 0.0.0.0 > /tmp/viper-web_rc.local.log &\n' /etc/rc.local
 
 

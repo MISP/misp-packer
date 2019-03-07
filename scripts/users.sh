@@ -12,4 +12,3 @@ chmod 0440 /etc/sudoers.d/misp
 
 echo "--- Creating zmqs user"
 useradd -U -G www-data -m -s /bin/bash  zmqs
-echo zmqs:zmqs"Password1234" | chpasswd

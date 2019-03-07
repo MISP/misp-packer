@@ -38,7 +38,7 @@ it when the VM is running. For example the IP address of your VM is
 If you want to build an image for VMWare you will need to install it and to
 use the VMWare builder with the command:
 
-    $ packer build -only=vmware-iso misp.json
+    $./build_vbox.sh 
 
 You can also launch all builders in parallel.
 

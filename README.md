@@ -17,7 +17,7 @@ to the IP address you will associate to your VM
 
 Launch the generation with the VirtualBox builder:
 
-    $ packer build -only=virtualbox-iso misp.json
+    $./build_vbox.sh 
 
 A VirtualBox image will be generated and stored in the folder
 *output-virtualbox-iso*.
@@ -38,7 +38,7 @@ it when the VM is running. For example the IP address of your VM is
 If you want to build an image for VMWare you will need to install it and to
 use the VMWare builder with the command:
 
-    $./build_vbox.sh 
+    $ packer build -only=vmware-iso misp.json
 
 You can also launch all builders in parallel.
 

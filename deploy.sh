@@ -7,6 +7,7 @@ TIME_START=$(date +%s)
 VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
 LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
+LATEST_COMMIT_SHORT=$(echo $LATEST_COMMIT|cut -c1-7)
 
 if [ "${VER}" == "" ] || [ "${LATEST_COMMIT}" == "" ] ; then
   echo "Somehow, could not 'curl' either a version or a commit tag, exiting -1..."
@@ -55,6 +56,23 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+}
+
+# Check if ponysay is installed. (https://github.com/erkin/ponysay)
+say () {
+  if [[ $(command -v ponysay) ]]; then
+    ponysay -c $1
+  else
+    echo $1
+  fi
+}
+
+think () {
+  if [[ $(command -v ponythink) ]]; then
+    ponythink -c $1
+  else
+    echo $1
+  fi
 }
 
 function removeAll()
@@ -132,7 +150,8 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
 
-  echo "The generation took ${TIME_DELTA} seconds"
+  say "The generation took ${TIME_DELTA} seconds"
 else
-  echo "Current ${PACKER_VM} version ${VER}@${LATEST_COMMIT} is up to date."
+  clear
+  think "Current ${PACKER_VM} version ${VER}@${LATEST_COMMIT_SHORT} is up to date."
 fi

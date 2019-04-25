@@ -108,13 +108,11 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json && VMWARE_BUILD="0" &
-
-  sleep 300
+  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$?
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json && VIRTUALBOX_BUILD="0"
+  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$?
 
   # Prevent uploading only half a build
   if [[ "$VMWARE_BUILD" == "0" ]] && [[ "VIRTUALBOX_BUILD" == "0" ]]; then
@@ -148,8 +146,8 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
     ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
   else
-    echo "The build status of VMware was: ${VMWARE_BUILD}"
-    echo "The build status of VBox   was: ${VIRTUALBOX_BUILD}"
+    echo "The packer exit code of VMware was: ${VMWARE_BUILD}"
+    echo "The packer exit code of VBox   was: ${VIRTUALBOX_BUILD}"
   fi
 
   # Remove files for next run

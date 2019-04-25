@@ -37,7 +37,7 @@ GPG_KEY="0x9BE4AEE9"
 ##PACKER_DEBUG="-debug"
 
 # Enable logging for packer
-export PACKER_LOG=1
+export PACKER_LOG=0
 
 # Make sure we have a current work directory
 PWD=`pwd`
@@ -61,6 +61,7 @@ fi
 # Check if ponysay is installed. (https://github.com/erkin/ponysay)
 say () {
   if [[ $(command -v ponysay) ]]; then
+    printf "\n\n\n\n\n"
     ponysay -c $1
   else
     echo $1
@@ -69,6 +70,7 @@ say () {
 
 think () {
   if [[ $(command -v ponythink) ]]; then
+    printf "\n\n\n\n\n"
     ponythink -c $1
   else
     echo $1
@@ -106,43 +108,49 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json &
+  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json && VMWARE_BUILD="0" &
 
   sleep 300
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json
+  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json && VIRTUALBOX_BUILD="0"
 
-  # ZIPup all the vmware stuff
-  zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
+  # Prevent uploading only half a build
+  if [[ "$VMWARE_BUILD" == "0" ]] && [[ "VIRTUALBOX_BUILD" == "0" ]]; then
+    # ZIPup all the vmware stuff
+    zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
 
-  # Create a hashfile for the zip
-  for SUMsize in `echo ${SHA_SUMS}`; do
-    shasum -a ${SUMsize} *.zip > ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha${SUMsize}
-  done
+    # Create a hashfile for the zip
+    for SUMsize in `echo ${SHA_SUMS}`; do
+      shasum -a ${SUMsize} *.zip > ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha${SUMsize}
+    done
 
 
-  # Current file list of everything to gpg sign and transfer
-  FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
+    # Current file list of everything to gpg sign and transfer
+    FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
 
-  # Create the latest MISP export directory
-  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-  ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+    # Create the latest MISP export directory
+    ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+    ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
 
-  # Sign and transfer files
-  for FILE in ${FILE_LIST}; do
-    gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
-    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-    rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-    ssh ${REL_USER}@${REL_SERVER} rm export/latest
-    ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
-  done
-  ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
-  ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
-  ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+    # Sign and transfer files
+    for FILE in ${FILE_LIST}; do
+      gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
+      rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+      rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+      ssh ${REL_USER}@${REL_SERVER} rm export/latest
+      ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
+    done
+    ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
+    ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+    ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
 
-  ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+    ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+  else
+    echo "The build status of VMware was: ${VMWARE_BUILD}"
+    echo "The build status of VBox   was: ${VIRTUALBOX_BUILD}"
+  fi
 
   # Remove files for next run
   removeAll 2> /dev/null

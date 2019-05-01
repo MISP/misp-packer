@@ -1,3 +1,4 @@
 packer_cache/
 output-virtualbox-iso/
+scripts/INSTALL.sh
 *.checksum

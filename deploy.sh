@@ -3,6 +3,12 @@
 # Timing creation
 TIME_START=$(date +%s)
 
+# Place holder
+function checkBin()
+{
+  echo "NOOP"
+}
+
 # Latest version of misp
 VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
@@ -97,6 +103,9 @@ removeAll 2> /dev/null
 
 # Fetching latest MISP LICENSE
 /usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
+
+# Fetch the latest MISP Installer
+/usr/bin/wget -q -O scripts/INSTALL.sh https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh
 
 # Check if latest build is still up to date, if not, roll and deploy new
 if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then

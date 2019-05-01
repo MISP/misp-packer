@@ -57,6 +57,35 @@ vm_version='2.4'
 # Place holder, this fn() should be used to anything signing related
 function signify()
 {
+
+  # This should create the following file:
+  # MISP_v2.4.105@3a25986766623f64255136e3fa5eec3af1faad7f-CHECKSUM.asc
+  # -----BEGIN PGP SIGNED MESSAGE-----
+  # Hash: SHA1, SHA256, SHA384, SHA512
+  #
+  # # $FILE_NAME: 3177185280 bytes
+  # SHA256 ($FILE_NAME) = bb0622b78449298e24a96b90b561b429edec71aae72b8f7a8c3da4d81e4df5b7
+  #
+  # # MISP_v2.4.105@3a25986766623f64255136e3fa5eec3af1faad7f.ova: 625999872 bytes
+  # SHA256 (MISP_v2.4.105@3a25986766623f64255136e3fa5eec3af1faad7f.ova) = 5e4eac4566d8c572bfb3bcf54b7d6c82006ec3c6c882a2c9235c6d3494d7b100
+  # -----BEGIN PGP SIGNATURE-----
+  #
+  # iQIcBAEBCAAGBQJcw139AAoJEO88ER/Pxlm557kP/2KCssWq9WF75XGSXuoALdpC
+  # ptEoUNgHBwlv00YtUwRyyuPQ/VGE6Jst9dEN7m4CUJGDgeSm2X8hPkvGcJ+Ns3+C
+  # 9LJurJ603fetvDFm80mqIxY3yfGSpL6Oqh3ppXVo/UC62No9a3sfg1/Fhu0G6Uk0
+  # bgvRxTgjXFTS7pA5KEqB8d07jxJJF5Z6Xjkz/mHp5zoRLaBE7z2v0uYTXARf91x4
+  # shSFSjUapYL2DYpJCWY8u7ROchU9sqiZmZrzZ0OHNZ3TZhvs8LIySecBY5NZO9xt
+  # 5Y9WYvB1Ivw875I+DSARshJB+hLW6VIAwIZ+UMcdrv7xgS+lMkgG77H37yS/pZ+8
+  # bL+pZb6uFo8OzdFmPWVodw4P/3jA/NxiZJFF81/K/pLFg/TVP8i/vfWzWS50Bx9p
+  # yzm3hGUliFocAhDcAipE0rPFko4Gm+TmwMzgE8hGDgFblmEfdlOcLH6zH36YXzQp
+  # ATCeavjClaJU8292/64+YWROHVRaNXcLpYIW9pD8a0XRz/prGFdzNdDF52QC/CE2
+  # gmaFfo6ggn208ciXLQKvYlaKEZa6m3nmLi6neHBiOla05jL94UXdcpYjI9kuIGxj
+  # 60AQaPhVKzAE4Yjh7Zxf5RKxMCHMjw8oT730GXD2TRwnv0Dmx8Ioc6IYoLMF57t3
+  # zpjK0m3T8vNuHKr5deMp
+  # =8sTO
+  # -----END PGP SIGNATURE-----
+  ## Source: https://getfedora.org/en/static/checksums/Fedora-Server-30-1.2-x86_64-CHECKSUM
+
 if [ -z "$1" ]; then
   echo "This function needs an argument"
   exit 1
@@ -124,7 +153,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$?
 
   # Prevent uploading only half a build
-  if [[ "$VMWARE_BUILD" == "0" ]] && [[ "VIRTUALBOX_BUILD" == "0" ]]; then
+  if [[ "$VMWARE_BUILD" == "0" ]] && [[ "$VIRTUALBOX_BUILD" == "0" ]]; then
     # ZIPup all the vmware stuff
     zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
 

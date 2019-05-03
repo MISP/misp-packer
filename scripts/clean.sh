@@ -10,6 +10,8 @@ apt autoremove -qqy
 echo "--- Cleaning packages"
 apt clean -qqy
 
+debconf-set-selections <<< "postfix postfix/mailname string localhost.localdomain"
+debconf-set-selections <<< "postfix postfix/main_mailer_type string 'No configuration'"
 apt install mailutils -qqy
 
 echo "--- Testing Instance ---"

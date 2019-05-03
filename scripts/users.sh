@@ -9,4 +9,3 @@ echo "--- Configuring sudo "
 echo %misp ALL=NOPASSWD:ALL > /etc/sudoers.d/misp
 ##chmod 0440 /etc/sudoers.d/thehive
 chmod 0440 /etc/sudoers.d/misp
-

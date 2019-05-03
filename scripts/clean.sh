@@ -1,16 +1,16 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 mv /tmp/issue /etc/issue
 mv /tmp/crontab /etc/cron.d/misp
 
 # package
 echo "--- autoremove for apt ---"
-apt-get autoremove -qq > /dev/null 2>&1
+apt autoremove -qqy
 
 echo "--- Cleaning packages"
-apt-get clean -qq > /dev/null 2>&1
+apt clean -qqy
 
-apt-get install mailutils -qq > /dev/null 2>&1
+apt install mailutils -qqy
 
 echo "--- Testing Instance ---"
 cd /var/www/MISP/PyMISP

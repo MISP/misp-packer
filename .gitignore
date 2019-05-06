@@ -1,4 +1,5 @@
 packer_cache/
 output-virtualbox-iso/
-scripts/INSTALL.sh
+scripts/INSTALL.sh*
 *.checksum
+misp-deploy.json

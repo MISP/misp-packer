@@ -4,7 +4,7 @@
 TIME_START=$(date +%s)
 
 # Place holder
-function checkBin()
+checkBin ()
 {
   echo "NOOP"
 }
@@ -55,7 +55,7 @@ vm_description='MISP, is an open source software solution for collecting, storin
 vm_version='2.4'
 
 # Place holder, this fn() should be used to anything signing related
-function signify()
+signify ()
 {
 
   # This should create the following file:
@@ -111,9 +111,18 @@ think () {
     echo $1
   fi
 }
+checkInstaller () {
+  for sum in $(echo $SHA_SUMS); do
+    /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
+    chsum=$(shasum -a $sum scripts/INSTALL.sh | cut -f1 -d\ )
+    if [[ "$chsum" == "$INSTsum" ]]; then
+      echo "sha${sum} matches"
+    fi
+  done
+}
 
-function removeAll()
-{
+
+removeAll () {
   # Remove files for next run
   rm -r output-virtualbox-iso
   rm -r output-vmware-iso
@@ -133,11 +142,16 @@ removeAll 2> /dev/null
 # Fetching latest MISP LICENSE
 /usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
-# Fetch the latest MISP Installer
-/usr/bin/wget -q -O scripts/INSTALL.sh https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh
+if [[ -e "scripts/INSTALL.sh" ]]; then
+  echo "Checking checksums"
+  checkInstaller
+else
+  /usr/bin/wget -q -O scripts/INSTALL.sh https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh
+  checkInstaller
+fi
 
 # Check if latest build is still up to date, if not, roll and deploy new
-if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
+if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
 
   echo "Current ${PACKER_VM} version is: ${VER}@${LATEST_COMMIT}"
 
@@ -186,11 +200,17 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/misp-latest.sha)" ]; then
   else
     echo "The packer exit code of VMware was: ${VMWARE_BUILD}"
     echo "The packer exit code of VBox   was: ${VIRTUALBOX_BUILD}"
+    echo "#fail" > /tmp/${PACKER_NAME}-latest.sha
+    removeAll 2> /dev/null
+    TIME_END=$(date +%s)
+    TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
+    echo "The generation took ${TIME_DELTA} seconds"
+    exit 1
   fi
 
   # Remove files for next run
   removeAll 2> /dev/null
-  echo ${LATEST_COMMIT} > /tmp/misp-latest.sha
+  echo ${LATEST_COMMIT} > /tmp/${PACKER_NAME}-latest.sha
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
 

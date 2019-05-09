@@ -112,9 +112,11 @@ think () {
   fi
 }
 checkInstaller () {
-  for sum in $(echo $SHA_SUMS); do
+  for sum in $(echo ${SHA_SUMS}); do
     /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
-    chsum=$(shasum -a $sum scripts/INSTALL.sh | cut -f1 -d\ )
+    INSTsum=$(shasum -a ${sum} scripts/INSTALL.sh | cut -f1 -d\ )
+    chsum=$(cat scripts/INSTALL.sh.sha${sum} | cut -f1 -d\ )
+
     if [[ "$chsum" == "$INSTsum" ]]; then
       echo "sha${sum} matches"
     fi

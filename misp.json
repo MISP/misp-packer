@@ -137,6 +137,7 @@
         "environment_vars": [
             "DESKTOP={{user `desktop`}}",
             "UPDATE={{user `update`}}",
+            "PACKER=1",
             "http_proxy={{user `http_proxy`}}",
             "https_proxy={{user `https_proxy`}}",
             "no_proxy={{user `no_proxy`}}"

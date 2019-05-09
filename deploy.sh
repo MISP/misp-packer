@@ -3,6 +3,15 @@
 # Timing creation
 TIME_START=$(date +%s)
 
+GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
+if [[ "$GOT_PACKER" == "0" ]]; then
+  echo "Packer detected, version: $(packer -v)"
+  PACKER_RUN=$(which packer)
+else
+  echo "No packer binary detected, please make sure you installed it from: https://www.packer.io/downloads.html"
+  exit 1
+fi
+
 # Place holder
 checkBin ()
 {
@@ -36,13 +45,13 @@ REL_USER="${PACKER_NAME}-release"
 REL_SERVER="cpab"
 
 # GPG Sign
-GPG_ENABLED=0
+GPG_ENABLED=1
 GPG_KEY="0x9BE4AEE9"
 
 # Enable debug for packer, omit -debug to disable
 ##PACKER_DEBUG="-debug"
 
-# Enable logging for packer
+# Enable logging and debug for packer
 export PACKER_LOG=0
 
 # Make sure we have a current work directory
@@ -119,6 +128,11 @@ checkInstaller () {
 
     if [[ "$chsum" == "$INSTsum" ]]; then
       echo "sha${sum} matches"
+    else
+      echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
+      echo "Deleting installer, please run again."
+      rm scripts/INSTALL.sh
+      exit 1
     fi
   done
 }
@@ -160,13 +174,13 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
   cat misp.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT}\",|" > misp-deploy.json
 
-  # Build vmware VM set
-  PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  /usr/local/bin/packer build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$?
-
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  /usr/local/bin/packer build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$?
+  $PACKER_RUN build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$?
+
+  # Build vmware VM set
+  PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
+  $PACKER_RUN build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$?
 
   # Prevent uploading only half a build
   if [[ "$VMWARE_BUILD" == "0" ]] && [[ "$VIRTUALBOX_BUILD" == "0" ]]; then
@@ -179,26 +193,37 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
     done
 
 
-    # Current file list of everything to gpg sign and transfer
-    FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
+  # Current file list of everything to gpg sign and transfer
+  FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
 
-    # Create the latest MISP export directory
+  # Create the latest MISP export directory
+  if [[ "${REMOTE}" == "1" ]]; then
     ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
     ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+  fi
 
-    # Sign and transfer files
-    for FILE in ${FILE_LIST}; do
+  # Sign and transfer files
+  for FILE in ${FILE_LIST}; do
+    if [[ "$GPG_ENABLED" == "1" ]]; then
+      # TODO: Consider GPG_KEY
       gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
+      [[ "${REMOTE}" == "1" ]] && rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+    fi
+
+    if [[ "${REMOTE}" == "1" ]]; then
       rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-      rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
       ssh ${REL_USER}@${REL_SERVER} rm export/latest
       ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
-    done
+    fi
+  done
+
+  if [[ "${REMOTE}" == "1" ]]; then
     ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
 
     ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+  fi
   else
     echo "The packer exit code of VMware was: ${VMWARE_BUILD}"
     echo "The packer exit code of VBox   was: ${VIRTUALBOX_BUILD}"

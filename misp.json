@@ -167,7 +167,7 @@
         "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -u {{user `ssh_name`}}  -E -S bash '{{ .Path }}'",
         "inline": [
           "chmod u+x /tmp/INSTALL.sh",
-          "/tmp/INSTALL.sh -A"
+          "/tmp/INSTALL.sh -A -u"
         ],
         "pause_before": "10s"
     },

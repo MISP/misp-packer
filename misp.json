@@ -91,6 +91,7 @@
             "passwd/user-password={{ user `ssh_password` }} ",
             "passwd/user-password-again={{ user `ssh_password` }} ",
             "passwd/username={{ user `ssh_username` }} ",
+            "debconf/frontend=noninteractive ",
             "-- <enter>"
         ]
     },
@@ -137,7 +138,6 @@
         "environment_vars": [
             "DESKTOP={{user `desktop`}}",
             "UPDATE={{user `update`}}",
-            "PACKER=1",
             "http_proxy={{user `http_proxy`}}",
             "https_proxy={{user `https_proxy`}}",
             "no_proxy={{user `no_proxy`}}"
@@ -165,6 +165,10 @@
     },
     {
         "type": "shell",
+        "environment_vars": [
+            "PACKER=1",
+            "DEBIAN_FRONTEND=noninteractive"
+        ],
         "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -u {{user `ssh_name`}}  -E -S bash '{{ .Path }}'",
         "inline": [
           "chmod u+x /tmp/INSTALL.sh",

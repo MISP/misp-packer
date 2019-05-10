@@ -155,6 +155,7 @@ removeAll () {
   rm packer_virtualbox-iso_virtualbox-iso_sha*.checksum.asc
   rm ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.asc
   rm /tmp/LICENSE-${PACKER_NAME}
+  rm /tmp/vbox.done /tmp/vmware.done
 }
 
 # TODO: Make it more graceful if files do not exist
@@ -181,16 +182,15 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
+  ($PACKER_RUN build  --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
-  while [[ ! -f /tmp/vbox.done ]] && [[ ! -f /tmp/vmware.done ]]; do
-    :
-  done
+  while [[ ! -f /tmp/vmware.done ]]; do :; done
+  while [[ ! -f /tmp/vbox.done ]]; do :; done
 
   # Prevent uploading only half a build
   if [[ "$VMWARE_BUILD" == "0" ]] && [[ "$VIRTUALBOX_BUILD" == "0" ]]; then
@@ -241,6 +241,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   else
     echo "The packer exit code of VMware was: ${VMWARE_BUILD}"
     echo "The packer exit code of VBox   was: ${VIRTUALBOX_BUILD}"
+    echo "--------------------------------------------------------------------------------"
     echo "#fail" > /tmp/${PACKER_NAME}-latest.sha
     removeAll 2> /dev/null
     TIME_END=$(date +%s)

@@ -46,7 +46,7 @@ REL_SERVER="cpab"
 
 # GPG Sign
 GPG_ENABLED=1
-GPG_KEY="0x9BE4AEE9"
+GPG_KEY="0x"
 
 # Enable debug for packer, omit -debug to disable
 ##PACKER_DEBUG="-debug"
@@ -104,6 +104,7 @@ fi
 
 # Check if ponysay is installed. (https://github.com/erkin/ponysay)
 say () {
+  echo $1 > /tmp/lastBuild.time
   if [[ $(command -v ponysay) ]]; then
     printf "\n\n\n\n\n"
     ponysay -c $1
@@ -140,14 +141,11 @@ checkInstaller () {
 
 removeAll () {
   # Remove files for next run
-  rm -r output-virtualbox-iso
-  rm -r output-vmware-iso
+  [[ -d "output-virtualbox-iso" ]] && rm -r output-virtualbox-iso
+  [[ -d "output-vmware-iso" ]] && rm -r output-vmware-iso
   rm *.checksum *.zip *.sha*
   rm ${PACKER_NAME}-deploy.json
-  rm packer_virtualbox-iso_virtualbox-iso_sha1.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha256.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha384.checksum.asc
-  rm packer_virtualbox-iso_virtualbox-iso_sha512.checksum.asc
+  rm packer_virtualbox-iso_virtualbox-iso_sha*.checksum.asc
   rm ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.asc
   rm /tmp/LICENSE-${PACKER_NAME}
 }
@@ -158,6 +156,7 @@ removeAll 2> /dev/null
 # Fetching latest MISP LICENSE
 /usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
 
+# Make sure the installer we run is the one that is currently on GitHub
 if [[ -e "scripts/INSTALL.sh" ]]; then
   echo "Checking checksums"
   checkInstaller
@@ -168,7 +167,6 @@ fi
 
 # Check if latest build is still up to date, if not, roll and deploy new
 if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
-
   echo "Current ${PACKER_VM} version is: ${VER}@${LATEST_COMMIT}"
 
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
@@ -206,18 +204,18 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
   for FILE in ${FILE_LIST}; do
     if [[ "$GPG_ENABLED" == "1" ]]; then
       # TODO: Consider GPG_KEY
-      gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
+      if [[ "$GPG_KEY" == "0x" ]] || [[ -z "$GPG_KEY" ]]; then
+        gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
+      else
+        gpg --armor -u ${GPG_KEY} --output ${FILE}.asc --detach-sig ${FILE}
+      fi
       [[ "${REMOTE}" == "1" ]] && rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
     fi
 
-    if [[ "${REMOTE}" == "1" ]]; then
-      rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-      ssh ${REL_USER}@${REL_SERVER} rm export/latest
-      ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
-    fi
-  done
-
   if [[ "${REMOTE}" == "1" ]]; then
+    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+    ssh ${REL_USER}@${REL_SERVER} rm export/latest
+    ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
     ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
@@ -231,7 +229,7 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
     removeAll 2> /dev/null
     TIME_END=$(date +%s)
     TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
-    echo "The generation took ${TIME_DELTA} seconds"
+    echo "The generation took ${TIME_DELTA} seconds" |tee /tmp/lastBuild.time
     exit 1
   fi
 

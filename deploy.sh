@@ -246,7 +246,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     TIME_END=$(date +%s)
     TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
     TIME=$(convertSecs ${TIME_DELTA})
-    echo "The generation took ${TIME}" |tee /tmp/lastBuild.time
+    echo "The last generation took ${TIME}" |tee /tmp/lastBuild.time
     exit 1
   fi
 
@@ -257,7 +257,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
   TIME=$(convertSecs ${TIME_DELTA})
 
-  say "The generation took ${TIME}"
+  say "The last generation took ${TIME}"
 else
   clear
   think "Current ${PACKER_VM} version ${VER}@${LATEST_COMMIT_SHORT} is up to date."

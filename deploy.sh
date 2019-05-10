@@ -182,11 +182,11 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build  --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
+  ($PACKER_RUN build  --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; export VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; export VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/vmware.done ]]; do :; done

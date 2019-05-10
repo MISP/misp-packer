@@ -24,7 +24,7 @@ VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name'
 LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
 LATEST_COMMIT_SHORT=$(echo $LATEST_COMMIT|cut -c1-7)
 
-if [ "${VER}" == "" ] || [ "${LATEST_COMMIT}" == "" ] ; then
+if [[ "${VER}" == "" ]] || [[ "${LATEST_COMMIT}" == "" ]] ; then
   echo "Somehow, could not 'curl' either a version or a commit tag, exiting -1..."
   exit -1
 fi
@@ -95,11 +95,18 @@ signify ()
   # -----END PGP SIGNATURE-----
   ## Source: https://getfedora.org/en/static/checksums/Fedora-Server-30-1.2-x86_64-CHECKSUM
 
-if [ -z "$1" ]; then
+if [[ -z "$1" ]]; then
   echo "This function needs an argument"
   exit 1
 fi
 
+}
+
+convertSecs() {
+  ((h=${1}/3600))
+  ((m=(${1}%3600)/60))
+  ((s=${1}%60))
+  printf "%02d:%02d:%02d\n" $h $m $s
 }
 
 # Check if ponysay is installed. (https://github.com/erkin/ponysay)
@@ -166,7 +173,7 @@ else
 fi
 
 # Check if latest build is still up to date, if not, roll and deploy new
-if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
+if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   echo "Current ${PACKER_VM} version is: ${VER}@${LATEST_COMMIT}"
 
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
@@ -174,11 +181,16 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  $PACKER_RUN build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$?
+  ($PACKER_RUN build  --on-error=ask -only=virtualbox-iso misp-deploy.json ; VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  $PACKER_RUN build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$?
+  ($PACKER_RUN build --on-error=ask -only=vmware-iso misp-deploy.json ; VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
+
+  # The below waits for the above 2 parallel packer builds to finish
+  while [[ ! -f /tmp/vbox.done ]] && [[ ! -f /tmp/vmware.done ]]; do
+    :
+  done
 
   # Prevent uploading only half a build
   if [[ "$VMWARE_BUILD" == "0" ]] && [[ "$VIRTUALBOX_BUILD" == "0" ]]; then
@@ -212,16 +224,20 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
       [[ "${REMOTE}" == "1" ]] && rsync -azvq --progress ${FILE}.asc ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
     fi
 
+    if [[ "${REMOTE}" == "1" ]]; then
+      rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
+      ssh ${REL_USER}@${REL_SERVER} rm export/latest
+      ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
+    fi
+  done
+
   if [[ "${REMOTE}" == "1" ]]; then
-    rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-    ssh ${REL_USER}@${REL_SERVER} rm export/latest
-    ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
     ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
     ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
-
     ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
   fi
+
   else
     echo "The packer exit code of VMware was: ${VMWARE_BUILD}"
     echo "The packer exit code of VBox   was: ${VIRTUALBOX_BUILD}"
@@ -229,7 +245,8 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
     removeAll 2> /dev/null
     TIME_END=$(date +%s)
     TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
-    echo "The generation took ${TIME_DELTA} seconds" |tee /tmp/lastBuild.time
+    TIME=$(convertSecs ${TIME_DELTA})
+    echo "The generation took ${TIME}" |tee /tmp/lastBuild.time
     exit 1
   fi
 
@@ -238,8 +255,9 @@ if [ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]; then
   echo ${LATEST_COMMIT} > /tmp/${PACKER_NAME}-latest.sha
   TIME_END=$(date +%s)
   TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
+  TIME=$(convertSecs ${TIME_DELTA})
 
-  say "The generation took ${TIME_DELTA} seconds"
+  say "The generation took ${TIME}"
 else
   clear
   think "Current ${PACKER_VM} version ${VER}@${LATEST_COMMIT_SHORT} is up to date."

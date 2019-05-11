@@ -182,18 +182,18 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build  --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; export VIRTUALBOX_BUILD=$? ; touch /tmp/vbox.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; echo $? > /tmp/vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; export VMWARE_BUILD=$? ; touch /tmp/vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; echo $? > /tmp/vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/vmware.done ]]; do :; done
   while [[ ! -f /tmp/vbox.done ]]; do :; done
 
   # Prevent uploading only half a build
-  if [[ "$VMWARE_BUILD" == "0" ]] && [[ "$VIRTUALBOX_BUILD" == "0" ]]; then
+  if [[ "$(cat /tmp/vbox.done)" == "0" ]] && [[ "$(cat /tmp/vmware.done)" == "0" ]]; then
     # ZIPup all the vmware stuff
     zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
 

@@ -8,12 +8,9 @@ Build a virtual machine for MISP based on Ubuntu 18.04 server
 * [VirtualBox](https://www.virtualbox.org)
 * [Packer](https://www.packer.io) from the Packer website
 * *tree* -> sudo apt install tree (on deployment side)
+* *rhash* -> sudo apt install rhash (on the builder side)
 
 ## Usage
-
-In the file *scripts/bootstrap.sh*, set the value of ``MISP_BASEURL`` according
-to the IP address you will associate to your VM
-(for example: http://172.16.100.100).
 
 Launch the generation with the VirtualBox builder:
 

@@ -129,12 +129,14 @@ think () {
   fi
 }
 checkInstaller () {
+  /usr/bin/wget -q -O scripts/INSTALL.sh.sfv https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sfv
+  rhash_chk=$(cd scripts ;rhash -c INSTALL.sh.sfv > /dev/null 2>&1; echo $?)
   for sum in $(echo ${SHA_SUMS}); do
     /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
     INSTsum=$(shasum -a ${sum} scripts/INSTALL.sh | cut -f1 -d\ )
     chsum=$(cat scripts/INSTALL.sh.sha${sum} | cut -f1 -d\ )
 
-    if [[ "$chsum" == "$INSTsum" ]]; then
+    if [[ "$chsum" == "$INSTsum" ]] && [[ "$rhash_chk" == "0" ]]; then
       echo "sha${sum} matches"
     else
       echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"

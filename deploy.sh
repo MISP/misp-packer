@@ -4,7 +4,7 @@
 TIME_START=$(date +%s)
 
 GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
-if [[ "$GOT_PACKER" == "0" ]]; then
+if [[ "${GOT_PACKER}" == "0" ]]; then
   echo "Packer detected, version: $(packer -v)"
   PACKER_RUN=$(which packer)
 else
@@ -22,15 +22,15 @@ checkBin ()
 VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
 LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
-LATEST_COMMIT_SHORT=$(echo $LATEST_COMMIT|cut -c1-7)
+LATEST_COMMIT_SHORT=$(echo ${LATEST_COMMIT} |cut -c1-7)
 
 if [[ "${VER}" == "" ]] || [[ "${LATEST_COMMIT}" == "" ]] ; then
   echo "Somehow, could not 'curl' either a version or a commit tag, exiting -1..."
   exit -1
 fi
 
-# SHAsums to be computed
-SHA_SUMS="1 256 384 512"
+# SHAsums to be computed, not the -- notatiation is for ease of use with rhash
+SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
 
 PACKER_NAME="misp"
 PACKER_VM="MISP"
@@ -95,7 +95,7 @@ signify ()
   # -----END PGP SIGNATURE-----
   ## Source: https://getfedora.org/en/static/checksums/Fedora-Server-30-1.2-x86_64-CHECKSUM
 
-if [[ -z "$1" ]]; then
+if [[ -z ${1} ]]; then
   echo "This function needs an argument"
   exit 1
 fi
@@ -106,37 +106,37 @@ convertSecs() {
   ((h=${1}/3600))
   ((m=(${1}%3600)/60))
   ((s=${1}%60))
-  printf "%02d:%02d:%02d\n" $h $m $s
+  printf "%02d:%02d:%02d\n" ${h} ${m} ${s}
 }
 
 # Check if ponysay is installed. (https://github.com/erkin/ponysay)
 say () {
-  echo $1 > /tmp/lastBuild.time
+  echo ${1} > /tmp/lastBuild.time
   if [[ $(command -v ponysay) ]]; then
     printf "\n\n\n\n\n"
-    ponysay -c $1
+    ponysay -c ${1}
   else
-    echo $1
+    echo ${1}
   fi
 }
 
 think () {
   if [[ $(command -v ponythink) ]]; then
     printf "\n\n\n\n\n"
-    ponythink -c $1
+    ponythink -c ${1}
   else
-    echo $1
+    echo ${1}
   fi
 }
 checkInstaller () {
   /usr/bin/wget -q -O scripts/INSTALL.sh.sfv https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sfv
   rhash_chk=$(cd scripts ;rhash -c INSTALL.sh.sfv > /dev/null 2>&1; echo $?)
-  for sum in $(echo ${SHA_SUMS}); do
+  for sum in $(echo ${SHA_SUMS} |sed 's/--sha//'); do
     /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
     INSTsum=$(shasum -a ${sum} scripts/INSTALL.sh | cut -f1 -d\ )
     chsum=$(cat scripts/INSTALL.sh.sha${sum} | cut -f1 -d\ )
 
-    if [[ "$chsum" == "$INSTsum" ]] && [[ "$rhash_chk" == "0" ]]; then
+    if [[ "${chsum}" == "${INSTsum}" ]] && [[ "${rhash_chk}" == "0" ]]; then
       echo "sha${sum} matches"
     else
       echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
@@ -200,24 +200,30 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip  packer_vmware-iso_vmware-iso_sha1.checksum packer_vmware-iso_vmware-iso_sha512.checksum output-vmware-iso
 
     # Create a hashfile for the zip
-    for SUMsize in `echo ${SHA_SUMS}`; do
+    for SUMsize in $(echo ${SHA_SUMS} |sed 's/--sha//'); do
       shasum -a ${SUMsize} *.zip > ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha${SUMsize}
     done
 
-
   # Current file list of everything to gpg sign and transfer
-  FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova packer_virtualbox-iso_virtualbox-iso_sha1.checksum packer_virtualbox-iso_virtualbox-iso_sha256.checksum packer_virtualbox-iso_virtualbox-iso_sha384.checksum packer_virtualbox-iso_virtualbox-iso_sha512.checksum ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
+  FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip \
+             output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT}.ova \
+             packer_virtualbox-iso_virtualbox-iso_sha1.checksum \
+             packer_virtualbox-iso_virtualbox-iso_sha256.checksum \
+             packer_virtualbox-iso_virtualbox-iso_sha384.checksum \
+             packer_virtualbox-iso_virtualbox-iso_sha512.checksum \
+             ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha1 \
+             ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha256 \
+             ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha384 \
+             ${PACKER_VM}_${VER}@${LATEST_COMMIT}-vmware.zip.sha512"
 
   # Create the latest MISP export directory
   if [[ "${REMOTE}" == "1" ]]; then
-    ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-    ssh ${REL_USER}@${REL_SERVER} mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
+    ssh ${REL_USER}@${REL_SERVER} "mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT} ; mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums"
   fi
 
   # Sign and transfer files
   for FILE in ${FILE_LIST}; do
     if [[ "$GPG_ENABLED" == "1" ]]; then
-      # TODO: Consider GPG_KEY
       if [[ "$GPG_KEY" == "0x" ]] || [[ -z "$GPG_KEY" ]]; then
         gpg --armor --output ${FILE}.asc --detach-sig ${FILE}
       else
@@ -228,16 +234,15 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
     if [[ "${REMOTE}" == "1" ]]; then
       rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT}
-      ssh ${REL_USER}@${REL_SERVER} rm export/latest
-      ssh ${REL_USER}@${REL_SERVER} ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest
+      ssh ${REL_USER}@${REL_SERVER} "rm export/latest ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT} export/latest"
     fi
   done
 
   if [[ "${REMOTE}" == "1" ]]; then
-    ssh ${REL_USER}@${REL_SERVER} chmod -R +r export
-    ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
-    ssh ${REL_USER}@${REL_SERVER} mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums
-    ssh ${REL_USER}@${REL_SERVER} cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html
+    ssh ${REL_USER}@${REL_SERVER} "chmod -R +r export \
+                                   mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*.checksum* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums \
+                                   mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/*-vmware.zip.sha* export/${PACKER_VM}_${VER}@${LATEST_COMMIT}/checksums \
+                                   cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html"
   fi
 
   else

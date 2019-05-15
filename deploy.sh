@@ -227,6 +227,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     # Create the latest MISP export directory
     if [[ "${REMOTE}" == "1" ]]; then
       ssh ${REL_USER}@${REL_SERVER} "mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT} ; mkdir -p export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums"
+      scp verify.txt ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/
     fi
 
     # Sign and transfer files
@@ -242,15 +243,22 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
       if [[ "${REMOTE}" == "1" ]]; then
         rsync -azvq --progress ${FILE} ${REL_USER}@${REL_SERVER}:export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}
-        ssh ${REL_USER}@${REL_SERVER} "rm export/latest ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT} export/latest"
+        ssh ${REL_USER}@${REL_SERVER} "rm export/latest ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT} export/latest ;\
+                                       rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc"
       fi
     done
 
     if [[ "${REMOTE}" == "1" ]]; then
       ssh ${REL_USER}@${REL_SERVER} "chmod -R +r export ;\
-                                     mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
-                                     mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
-                                     cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html"
+         mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv     export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
+         mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
+         rm export/${PACKER_VM}_${VER}@latest.ova              ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.ova export/${PACKER_VM}_${VER}@latest.ova ;\
+         rm export/${PACKER_VM}_${VER}@latest.ova.asc          ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.ova.asc export/${PACKER_VM}_${VER}@latest.ova.asc ;\
+         rm export/${PACKER_VM}_${VER}@latest-VMware.zip       ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip export/${PACKER_VM}_${VER}@latest-VMware.zip ;\
+         rm export/${PACKER_VM}_${VER}@latest-VMware.zip.asc   ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip.asc export/${PACKER_VM}_${VER}@latest-VMware.zip.asc ;\
+         rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv     ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv ;\
+         rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ;\
+         cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html "
     fi
 
   else

@@ -1,0 +1,56 @@
+How to verify the Automate MISP-VMs?
+------------------------------------
+
+In this directory you will find the following files:
+
+- OVA File (VirtualBox export of the VM)
+- ZIP File (ZIP Packae of the VMware VM)
+- ASC File (PGP Armored file of the above files)
+- checksums Directory (The directory with all the checksums of the above files)
+
+Verify VirtualBox OVA
+---------------------
+
+1. Download signatures
+
+Download the OVA and the ASC into the same directory.
+
+2. Verify signatures
+
+On the command line verify the PGP signature first, example:
+
+$ gpg --verify MISP_v2.4.107@latest.ova.asc MISP_v2.4.107@latest.ova
+
+TODO: Include output.
+
+3. Download SFV files
+
+Now download the checksum file and its signature, and verify.
+
+$ wget https://www.circl.lu/misp-images/MISP_v2.4.107@latest-CHECKSUM.sfv
+$ wget https://www.circl.lu/misp-images/MISP_v2.4.107@latest-CHECKSUM.sfv.asc
+$ gpg --verify /MISP_v2.4.107@latest-CHECKSUM.sfv.asc MISP_v2.4.107@latest-CHECKSUM.sfv
+
+Next, use rhash or go with the manual way.
+
+rhash
+-----
+
+$ rhash -c MISP_v2.4.107@latest-CHECKSUM.sfv
+
+Verify VMware
+-------------
+
+1. Download signatures
+
+Download the ZIP and the ASC into the same directory.
+
+2. Verify signatures
+
+On the command line verify the PGP signature first, example:
+
+$ gpg --verify MISP_v2.4.107@latest-VMware.zip.asc MISP_v2.4.107@latest-VMware.zip
+
+TODO: Include output.
+
+Do steps number 3 from above.

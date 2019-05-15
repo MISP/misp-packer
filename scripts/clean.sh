@@ -21,10 +21,13 @@ cd /var/www/MISP/PyMISP
 
 if [ "$?" != "0" ]; then
   echo "Damage, terrible terrible damage!!!!" >> /tmp/tests-output.txt
+  # TODO: Move the smtp server and e-mail address to a config file
   set smtp=smtp://149.13.33.5 ; cat /tmp/tests-output.txt |mail -s "tests/testlive_comprehensive.py failed on autogen-VM" steve.clement@circl.lu
 fi
 
 rm -rf tests/viper-test-files
+
+rm /etc/apt/apt.conf.d/99progressbar
 
 # End Cleaning
 echo "VM cleaned and rebooting for automagic reas0ns."

@@ -165,10 +165,8 @@ removeAll () {
   [[ -d "output-virtualbox-iso" ]] && rm -r output-virtualbox-iso
   [[ -d "output-vmware-iso" ]] && rm -r output-vmware-iso
   [[ -d "VMware" ]] && rm -r VMware
-  rm *.zip *.sfv
+  rm -f *.zip *.zip.asc *.sfv *.sfv.asc *.ova *.ova.asc index.html
   rm ${PACKER_NAME}-deploy.json
-  rm packer_virtualbox-iso_virtualbox-iso_sha*.sfv.asc
-  rm ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-vmware.zip.asc
   rm /tmp/LICENSE-${PACKER_NAME}
   rm /tmp/vbox.done /tmp/vmware.done
 }
@@ -249,8 +247,9 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     done
 
     if [[ "${REMOTE}" == "1" ]]; then
-      ssh ${REL_USER}@${REL_SERVER} "chmod -R +r export \
-                                     mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/*.CHECKSUM* export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums \
+      ssh ${REL_USER}@${REL_SERVER} "chmod -R +r export ;\
+                                     mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
+                                     mv export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums ;\
                                      cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html"
     fi
 

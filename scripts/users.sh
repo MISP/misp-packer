@@ -12,3 +12,4 @@ chmod 0440 /etc/sudoers.d/misp
 
 # Disable fancy progressbar
 echo 'Dpkg::Progress-Fancy "0";' > /etc/apt/apt.conf.d/99progressbar
+echo 'Dpkg::Use-Pty "0";' >> /etc/apt/apt.conf.d/99progressbar

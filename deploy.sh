@@ -143,7 +143,7 @@ think () {
 checkInstaller () {
   /usr/bin/wget -q -O scripts/INSTALL.sh.sfv https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sfv
   rhash_chk=$(cd scripts ; ${RHASH_RUN} -c INSTALL.sh.sfv > /dev/null 2>&1; echo $?)
-  for sum in $(echo ${SHA_SUMS} |sed 's/--sha//'); do
+  for sum in $(echo ${SHA_SUMS} |sed 's/--sha//g'); do
     /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
     INSTsum=$(shasum -a ${sum} scripts/INSTALL.sh | cut -f1 -d\ )
     chsum=$(cat scripts/INSTALL.sh.sha${sum} | cut -f1 -d\ )

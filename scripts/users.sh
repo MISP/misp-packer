@@ -9,3 +9,6 @@ echo "--- Configuring sudo "
 echo "%misp ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/misp
 ##chmod 0440 /etc/sudoers.d/thehive
 chmod 0440 /etc/sudoers.d/misp
+
+# Disable fancy progressbar
+echo 'Dpkg::Progress-Fancy "0";' > /etc/apt/apt.conf.d/99progressbar

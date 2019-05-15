@@ -7,7 +7,7 @@ Build a virtual machine for MISP based on Ubuntu 18.04 server
 
 * [VirtualBox](https://www.virtualbox.org)
 * [Packer](https://www.packer.io) from the Packer website
-* *tree* -> sudo apt install tree (on deployment side)
+* *index-fancy* -> https://github.com/Vestride/fancy-index (on deployment side)
 * *rhash* -> sudo apt install rhash (on the builder side)
 
 ## Usage

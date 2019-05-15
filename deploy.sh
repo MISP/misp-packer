@@ -257,8 +257,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
          rm export/${PACKER_VM}_${VER}@latest-VMware.zip       ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip export/${PACKER_VM}_${VER}@latest-VMware.zip ;\
          rm export/${PACKER_VM}_${VER}@latest-VMware.zip.asc   ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip.asc export/${PACKER_VM}_${VER}@latest-VMware.zip.asc ;\
          rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv     ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv ;\
-         rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ;\
-         cd export ; tree -T "${PACKER_VM} VM Images" -H https://www.circl.lu/misp-images/ -o index.html "
+         rm export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc ; ln -s ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}/checksums/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv.asc export/${PACKER_VM}_${VER}@latest-CHECKSUM.sfv.asc"
     fi
 
   else

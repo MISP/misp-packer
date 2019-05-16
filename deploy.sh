@@ -210,14 +210,14 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     # ZIPup all the vmware stuff
     mv output-vmware-iso VMware
     cd VMware
-    ${RHASH_RUN} --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VRE}@${LATEST_COMMIT_SHORT}.sfv *
+    ${RHASH_RUN} --lowercase --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.sfv *
     cd ../
     zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip VMware/*
 
     mv output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.ova .
 
     # Create a hashfile for the zip
-    ${RHASH_RUN} --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv *.zip *.ova
+    ${RHASH_RUN} --lowercase --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv *.zip *.ova
 
     # Current file list of everything to gpg sign and transfer
     FILE_LIST="${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip \

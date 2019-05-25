@@ -3,6 +3,7 @@
 # Timing creation
 TIME_START=$(date +%s)
 
+# TODO: Move into seprate file
 GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
 if [[ "${GOT_PACKER}" == "0" ]]; then
   echo "Packer detected, version: $(packer -v)"
@@ -21,16 +22,12 @@ else
   exit 1
 fi
 
-# Place holder
-checkBin ()
-{
-  echo "NOOP"
-}
-
+REPO="${REPO}"
+BRANCH="2.4"
 # Latest version of misp
-VER=$(curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name')
+VER=$(curl -s https://api.github.com/repos/${REPO}/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
-LATEST_COMMIT=$(curl -s https://api.github.com/repos/MISP/MISP/commits  |jq -r '.[0] | .sha')
+LATEST_COMMIT=$(curl -s https://api.github.com/repos/${REPO}/commits  |jq -r '.[0] | .sha')
 LATEST_COMMIT_SHORT=$(echo ${LATEST_COMMIT} |cut -c1-7)
 
 if [[ "${VER}" == "" ]] || [[ "${LATEST_COMMIT}" == "" ]] ; then
@@ -38,12 +35,17 @@ if [[ "${VER}" == "" ]] || [[ "${LATEST_COMMIT}" == "" ]] ; then
   exit -1
 fi
 
-# SHAsums to be computed, not the -- notatiation is for ease of use with rhash
+# SHAsums to be computed, note the -- notatiation is for ease of use with rhash
 SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
 
 PACKER_NAME="misp"
 PACKER_VM="MISP"
 NAME="misp-packer"
+
+NAME_OF_INSTALLER="INSTALL.sh"
+PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
+URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
+URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
 
 # Update time-stamp and make sure file exists
 touch /tmp/${PACKER_NAME}-latest.sha
@@ -70,15 +72,21 @@ PWD=`pwd`
 mkdir -p ${PWD}/log
 
 vm_description='MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.'
-vm_version='2.4'
+vm_version=${BRANCH}
 
+
+
+# Place holder
+checkBin ()
+{
+  echo "NOOP"
+}
 
 # TODO: have the checksums on a 2nd source, GitHub? compare https://circl.lu with GH
 
 # Place holder, this fn() should be used to anything signing related
 signify ()
 {
-
   # This should create the following file:
   # MISP_v2.4.105@3a25986766623f64255136e3fa5eec3af1faad7f-CHECKSUM.asc
   # -----BEGIN PGP SIGNED MESSAGE-----
@@ -140,25 +148,25 @@ think () {
     echo ${1}
   fi
 }
+
 checkInstaller () {
-  /usr/bin/wget -q -O scripts/INSTALL.sh.sfv https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sfv
-  rhash_chk=$(cd scripts ; ${RHASH_RUN} -c INSTALL.sh.sfv > /dev/null 2>&1; echo $?)
+  /usr/bin/wget -q -O ${PATH_TO_INSTALLER}.sfv ${URL_TO_INSTALLER}.sfv
+  rhash_chk=$(cd scripts ; ${RHASH_RUN} -c ${NAME_OF_INSTALLER}.sfv > /dev/null 2>&1; echo $?)
   for sum in $(echo ${SHA_SUMS} |sed 's/--sha//g'); do
-    /usr/bin/wget -q -O scripts/INSTALL.sh.sha${sum} https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh.sha${sum}
-    INSTsum=$(shasum -a ${sum} scripts/INSTALL.sh | cut -f1 -d\ )
-    chsum=$(cat scripts/INSTALL.sh.sha${sum} | cut -f1 -d\ )
+    /usr/bin/wget -q -O ${PATH_TO_INSTALLER}.sha${sum} ${URL_TO_INSTALLER}.sha${sum}
+    INSTsum=$(shasum -a ${sum} ${PATH_TO_INSTALLER} | cut -f1 -d\ )
+    chsum=$(cat ${PATH_TO_INSTALLER}.sha${sum} | cut -f1 -d\ )
 
     if [[ "${chsum}" == "${INSTsum}" ]] && [[ "${rhash_chk}" == "0" ]]; then
       echo "sha${sum} matches"
     else
       echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
       echo "Deleting installer, please run again."
-      rm scripts/INSTALL.sh
+      rm ${PATH_TO_INSTALLER}
       exit 1
     fi
   done
 }
-
 
 removeAll () {
   # Remove files for next run
@@ -175,14 +183,14 @@ removeAll () {
 removeAll 2> /dev/null
 
 # Fetching latest MISP LICENSE
-/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} https://raw.githubusercontent.com/MISP/MISP/2.4/LICENSE
+/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} ${URL_TO_LICENSE}
 
 # Make sure the installer we run is the one that is currently on GitHub
-if [[ -e "scripts/INSTALL.sh" ]]; then
+if [[ -e ${PATH_TO_INSTALLER} ]]; then
   echo "Checking checksums"
   checkInstaller
 else
-  /usr/bin/wget -q -O scripts/INSTALL.sh https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh
+  /usr/bin/wget -q -O ${PATH_TO_INSTALLER} ${URL_TO_INSTALLER}
   checkInstaller
 fi
 
@@ -191,15 +199,15 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   echo "Current ${PACKER_VM} version is: ${VER}@${LATEST_COMMIT_SHORT}"
 
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
-  cat misp.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}\",|" > misp-deploy.json
+  cat ${PACKER_NAME}.json| sed "s|\"vm_name\": \"MISP_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}\",|" > ${PACKER_NAME}-deploy.json
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso misp-deploy.json ; echo $? > /tmp/vbox.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso misp-deploy.json ; echo $? > /tmp/vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/vmware.done ]]; do :; done
@@ -210,6 +218,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     # ZIPup all the vmware stuff
     mv output-vmware-iso VMware
     cd VMware
+    # TODO/FIXME: Use ${SHA_SUMS} instead of static --shaFOO
     ${RHASH_RUN} --lowercase --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.sfv *
     cd ../
     zip -r ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-VMware.zip VMware/*
@@ -217,6 +226,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     mv output-virtualbox-iso/${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}.ova .
 
     # Create a hashfile for the zip
+    # TODO/FIXME: Use ${SHA_SUMS} instead of static --shaFOO
     ${RHASH_RUN} --lowercase --sfv --sha1 --sha256 --sha384 --sha512 -o ${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}-CHECKSUM.sfv *.zip *.ova
 
     # Current file list of everything to gpg sign and transfer

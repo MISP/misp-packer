@@ -22,7 +22,7 @@ else
   exit 1
 fi
 
-REPO="${REPO}"
+REPO="MISP/MISP"
 BRANCH="2.4"
 # Latest version of misp
 VER=$(curl -s https://api.github.com/repos/${REPO}/tags  |jq -r '.[0] | .name')

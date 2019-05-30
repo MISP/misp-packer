@@ -40,7 +40,7 @@ SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
 
 PACKER_NAME="misp"
 PACKER_VM="MISP"
-NAME="misp-packer"
+NAME="${PACKER_NAME}-packer"
 
 NAME_OF_INSTALLER="INSTALL.sh"
 PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
@@ -176,7 +176,7 @@ removeAll () {
   rm -f *.zip *.zip.asc *.sfv *.sfv.asc *.ova *.ova.asc index.html
   rm ${PACKER_NAME}-deploy.json
   rm /tmp/LICENSE-${PACKER_NAME}
-  rm /tmp/vbox.done /tmp/vmware.done
+  rm /tmp/${PACKER_NAME}-vbox.done /tmp/${PACKER_NAME}-vmware.done
 }
 
 # TODO: Make it more graceful if files do not exist
@@ -203,18 +203,18 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/vbox.done) &
+  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
-  while [[ ! -f /tmp/vmware.done ]]; do :; done
-  while [[ ! -f /tmp/vbox.done   ]]; do :; done
+  while [[ ! -f /tmp/${PACKER_NAME}-vmware.done ]]; do :; done
+  while [[ ! -f /tmp/${PACKER_NAME}-vbox.done   ]]; do :; done
 
   # Prevent uploading only half a build
-  if [[ "$(cat /tmp/vbox.done)" == "0" ]] && [[ "$(cat /tmp/vmware.done)" == "0" ]]; then
+  if [[ "$(cat /tmp/${PACKER_NAME}-vbox.done)" == "0" ]] && [[ "$(cat /tmp/${PACKER_NAME}-vmware.done)" == "0" ]]; then
     # ZIPup all the vmware stuff
     mv output-vmware-iso VMware
     cd VMware
@@ -279,7 +279,7 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
     TIME_END=$(date +%s)
     TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
     TIME=$(convertSecs ${TIME_DELTA})
-    echo "The last generation took ${TIME}" |tee /tmp/lastBuild.time
+    echo "The last generation took ${TIME}" |tee /tmp/${PACKER_NAME}-lastBuild.time
     exit 1
   fi
 

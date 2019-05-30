@@ -71,10 +71,6 @@ PWD=`pwd`
 # Make sure log dir exists (-p quiets if exists)
 mkdir -p ${PWD}/log
 
-vm_description='MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.'
-vm_version=${BRANCH}
-
-
 
 # Place holder
 checkBin ()
@@ -183,7 +179,12 @@ removeAll () {
 removeAll 2> /dev/null
 
 # Fetching latest MISP LICENSE
-/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} ${URL_TO_LICENSE}
+NET_WGET=$(/usr/bin/wget -q -O /tmp/LICENSE-${PACKER_NAME} ${URL_TO_LICENSE}; echo $?)
+
+if [[ "$NET_WGET" != "0" ]]; then
+  echo "wget failed with error code: ${NET_WGET} - please fix."
+  exit $NET_WGET
+fi
 
 # Make sure the installer we run is the one that is currently on GitHub
 if [[ -e ${PATH_TO_INSTALLER} ]]; then
@@ -203,11 +204,11 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
 
   # Build virtualbox VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
 
   # Build vmware VM set
   PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -var "vm_description=${vm_description}" -var "vm_version=${vm_version}" -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
+  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/${PACKER_NAME}-vmware.done ]]; do :; done

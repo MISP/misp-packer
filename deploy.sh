@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Bash 5.0 new variables:
+## EPOCHSECONDS (epoch time)
+## EPOCHREALTIME (epoch float)
+## BASH_ARGV0 (investigate)
+## build-in wait (bash -f investigate)
+
 # Timing creation
 TIME_START=$(date +%s)
 

@@ -11,7 +11,7 @@ TIME_START=$(date +%s)
 
 # TODO: Move into seprate file
 GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
-if [[ "${GOT_PACKER}" == "0" ]]; then
+if [[ "${GOT_PACKER}" == 0 ]]; then
   echo "Packer detected, version: $(packer -v)"
   PACKER_RUN=$(which packer)
 else
@@ -20,7 +20,7 @@ else
 fi
 
 GOT_RHASH=$(which rhash > /dev/null 2>&1; echo $?)
-if [[ "${GOT_RHASH}" == "0" ]]; then
+if [[ "${GOT_RHASH}" == 0 ]]; then
   echo "rhash detected, version: $(rhash --version)"
   RHASH_RUN=$(which rhash)
 else
@@ -152,14 +152,14 @@ think () {
 }
 
 checkInstaller () {
-  /usr/bin/wget -q -O ${PATH_TO_INSTALLER}.sfv ${URL_TO_INSTALLER}.sfv
+  /usr/bin/wget --no-cache -q -O ${PATH_TO_INSTALLER}.sfv ${URL_TO_INSTALLER}.sfv
   rhash_chk=$(cd scripts ; ${RHASH_RUN} -c ${NAME_OF_INSTALLER}.sfv > /dev/null 2>&1; echo $?)
   for sum in $(echo ${SHA_SUMS} |sed 's/--sha//g'); do
-    /usr/bin/wget -q -O ${PATH_TO_INSTALLER}.sha${sum} ${URL_TO_INSTALLER}.sha${sum}
+    /usr/bin/wget --no-cache -q -O ${PATH_TO_INSTALLER}.sha${sum} ${URL_TO_INSTALLER}.sha${sum}
     INSTsum=$(shasum -a ${sum} ${PATH_TO_INSTALLER} | cut -f1 -d\ )
     chsum=$(cat ${PATH_TO_INSTALLER}.sha${sum} | cut -f1 -d\ )
 
-    if [[ "${chsum}" == "${INSTsum}" ]] && [[ "${rhash_chk}" == "0" ]]; then
+    if [[ ${chsum} == ${INSTsum} ]] && [[ ${rhash_chk} == 0 ]]; then
       echo "sha${sum} matches"
     else
       echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
@@ -197,7 +197,7 @@ if [[ -e ${PATH_TO_INSTALLER} ]]; then
   echo "Checking checksums"
   checkInstaller
 else
-  /usr/bin/wget -q -O ${PATH_TO_INSTALLER} ${URL_TO_INSTALLER}
+  /usr/bin/wget --no-cache -q -O ${PATH_TO_INSTALLER} ${URL_TO_INSTALLER}
   checkInstaller
 fi
 

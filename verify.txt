@@ -19,6 +19,7 @@ Download the OVA and the ASC into the same directory.
 
 On the command line verify the PGP signature first, example:
 
+$ gpg --keyserver pgp.circl.lu --recv-key 0x34F20B13
 $ gpg --verify MISP_v2.4.107@latest.ova.asc MISP_v2.4.107@latest.ova
 gpg: Signature made Wed 15 May 2019 07:04:42 PM JST
 gpg:                using RSA key EDEC891834F20B13

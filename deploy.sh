@@ -177,6 +177,7 @@ removeAll () {
   [[ -d "VMware" ]] && rm -r VMware
   rm -f *.zip *.zip.asc *.sfv *.sfv.asc *.ova *.ova.asc index.html
   rm ${PACKER_NAME}-deploy.json
+  rm script/INSTALL.sh*
   rm /tmp/LICENSE-${PACKER_NAME}
   rm /tmp/${PACKER_NAME}-vbox.done /tmp/${PACKER_NAME}-vmware.done
 }

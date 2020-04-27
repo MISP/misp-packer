@@ -117,9 +117,7 @@
         "ssh_wait_timeout": "20m",
         "type": "vmware-iso",
         "vm_name": "{{user `vm_name`}}",
-        "vmx_data": {
-            "memsize": "{{user `memory`}}"
-        },
+        "memory": "{{user `memory`}}",
 
         "boot_command" : [
             "<esc><esc><enter><wait>",

@@ -9,6 +9,39 @@
 # Timing creation
 TIME_START=$(date +%s)
 
+# Name of the packer
+PACKER_NAME="misp"
+PACKER_VM="MISP"
+NAME="${PACKER_NAME}-packer"
+
+# Configure your user and remote server
+REMOTE=1
+REL_USER="${PACKER_NAME}-release"
+REL_SERVER="cpab"
+
+# GPG Sign
+GPG_ENABLED=1
+GPG_KEY="0x34F20B13"
+
+# Enable debug for packer, omit -debug to disable
+##PACKER_DEBUG="-debug"
+
+# Enable logging and debug for packer
+export PACKER_LOG=0
+
+REPO="MISP/MISP"
+BRANCH="2.4"
+
+# SHAsums to be computed, note the -- notatiation is for ease of use with rhash
+SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
+
+NAME_OF_INSTALLER="INSTALL.sh"
+PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
+URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
+URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
+
+### ---- NOT TOUCHY BEOYND THIS POINT, PLEASE --- ###
+
 # TODO: Move into seprate file
 GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
 if [[ "${GOT_PACKER}" == 0 ]]; then
@@ -28,8 +61,6 @@ else
   exit 1
 fi
 
-REPO="MISP/MISP"
-BRANCH="2.4"
 # Latest version of misp
 VER=$(curl -s https://api.github.com/repos/${REPO}/tags  |jq -r '.[0] | .name')
 # Latest commit hash of misp
@@ -41,35 +72,8 @@ if [[ "${VER}" == "" ]] || [[ "${LATEST_COMMIT}" == "" ]] ; then
   exit -1
 fi
 
-# SHAsums to be computed, note the -- notatiation is for ease of use with rhash
-SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
-
-PACKER_NAME="misp"
-PACKER_VM="MISP"
-NAME="${PACKER_NAME}-packer"
-
-NAME_OF_INSTALLER="INSTALL.sh"
-PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
-URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
-URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
-
 # Update time-stamp and make sure file exists
 touch /tmp/${PACKER_NAME}-latest.sha
-
-# Configure your user and remote server
-REMOTE=1
-REL_USER="${PACKER_NAME}-release"
-REL_SERVER="cpab"
-
-# GPG Sign
-GPG_ENABLED=1
-GPG_KEY="0x"
-
-# Enable debug for packer, omit -debug to disable
-##PACKER_DEBUG="-debug"
-
-# Enable logging and debug for packer
-export PACKER_LOG=0
 
 # Make sure we have a current work directory
 PWD=`pwd`

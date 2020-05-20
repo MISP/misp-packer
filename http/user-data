@@ -1,0 +1,20 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: misp-vm
+    username: 'misp'
+    password: '$6$Zw5jtOmRPBqrzFT7$st/15FZrcYhlt7bgv70ILUsPfzEuFumiZF.CdXJ9VdVXXLHI4WIjJ6MS/5g3410L1ogCO5O7B7ro.XEFZ2P0o0'
+  network:
+    network:
+      version: 2
+      ethernets:
+        ens33:
+          dhcp4: true
+          dhcp-identifier: mac
+  ssh:
+    install-server: true
+  late-commands:
+    - touch /target/etc/cloud/cloud-init.disabled
+    - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
+    - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'

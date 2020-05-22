@@ -4,36 +4,23 @@
     {
       "boot_command": [
         "{{ user `boot_command_prefix` }}",
-        "/install/vmlinuz noapic ",
-        "initrd=/install/initrd.gz ",
-        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-        "hostname={{ user `hostname` }} ",
-        "grub-installer/bootdev=/dev/sda<wait> ",
-        "fb=false debconf/frontend=noninteractive ",
-        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-        "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-        "passwd/user-fullname={{ user `ssh_fullname` }} ",
-        "passwd/user-password={{ user `ssh_password` }} ",
-        "passwd/user-password-again={{ user `ssh_password` }} ",
-        "passwd/username={{ user `ssh_username` }} ",
-        "debconf/frontend=noninteractive ",
-        "-- <enter>"
+        "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
+        "<enter>"
       ],
-      "disk_size": "{{user `disk_size`}}",
+      "disk_size": "{{ user `disk_size` }}",
       "export_opts": [
         "--manifest",
         "--vsys", "0",
         "--eulafile", "/tmp/LICENSE-misp",
-        "--description", "{{user `vm_description`}}",
-        "--version", "{{user `vm_version`}}"
+        "--description", "{{ user `vm_description` }}",
+        "--version", "{{ user `vm_version` }}"
       ],
       "format": "ova",
       "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
       "guest_os_type": "Ubuntu_64",
       "hard_drive_interface": "sata",
-      "headless": "{{user `headless`}}",
-      "http_directory": "preseeds",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "http",
       "http_port_max": 9011,
       "http_port_min": 9001,
       "iso_checksum": "{{ user `iso_checksum` }}",
@@ -42,11 +29,11 @@
         "{{ user `iso_path` }}/{{ user `iso_name` }}",
         "{{ user `iso_url` }}"
       ],
-      "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
-      "ssh_password": "{{user `ssh_pass`}}",
+      "shutdown_command": "echo {{ user `ssh_pass` }} | sudo -S shutdown -P now",
+      "ssh_password": "{{ user `ssh_pass` }}",
       "ssh_pty": "true",
       "ssh_timeout": "20m",
-      "ssh_username": "{{user `ssh_name`}}",
+      "ssh_username": "{{ user `ssh_user` }}",
       "type": "virtualbox-iso",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}" ],
@@ -68,37 +55,33 @@
     },
     {
       "boot_command": [
-        "<esc><esc><enter><wait>",
-        "/install/vmlinuz noapic ",
-        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-        "hostname={{user `hostname`}} ",
-        "fb=false debconf/frontend=noninteractive ",
-        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-        "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-        "initrd=/install/initrd.gz -- <enter>"
+        "{{ user `boot_command_prefix` }}",
+        "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
+        "<enter>"
       ],
-      "disk_size": "{{user `disk_size`}}",
+      "boot_wait": "5s",
+      "disk_size": "{{ user `disk_size` }}",
       "guest_os_type": "ubuntu-64",
-      "headless": "{{user `headless`}}",
-      "http_directory": "preseeds",
-      "http_port_max": 9011,
+      "headless": "{{ user `headless` }}",
+      "http_directory": "http",
       "http_port_min": 9001,
+      "http_port_max": 9011,
       "iso_checksum": "{{ user `iso_checksum` }}",
       "iso_checksum_type": "{{ user `iso_checksum_type` }}",
       "iso_urls": [
         "{{ user `iso_path` }}/{{ user `iso_name` }}",
         "{{ user `iso_url` }}"
       ],
-      "memory": "{{user `memory`}}",
-      "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
-      "skip_compaction": false,
-      "ssh_password": "{{user `ssh_pass`}}",
+      "memory": "{{ user `memory` }}",
+      "shutdown_command": "echo {{user `ssh_pass`}} |sudo -S shutdown -P now",
+      "skip_compaction":  false,
       "ssh_pty": "true",
-      "ssh_timeout": "20m",
-      "ssh_username": "{{user `ssh_name`}}",
+      "ssh_timeout": "30m",
+      "ssh_handshake_attempts": "90",
+      "ssh_username": "{{user `ssh_user`}}",
+      "ssh_password": "{{user `ssh_pass`}}",
       "type": "vmware-iso",
-      "vm_name": "{{user `vm_name`}}"
+      "vm_name": "{{ user `vm_name` }}"
     }
   ],
   "provisioners": [
@@ -118,12 +101,12 @@
     },
     {
       "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
-      "script": "scripts/users.sh",
+      "script": "scripts/extend.sh",
       "type": "shell"
     },
     {
       "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
-      "script": "scripts/interfaces.sh",
+      "script": "scripts/users.sh",
       "type": "shell"
     },
     {
@@ -136,7 +119,7 @@
         "PACKER=1",
         "DEBIAN_FRONTEND=noninteractive"
       ],
-      "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -u {{user `ssh_name`}}  -E -S bash '{{ .Path }}'",
+      "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -u {{user `ssh_user`}}  -E -S bash '{{ .Path }}'",
       "inline": [
         "chmod u+x /tmp/INSTALL.sh",
         "/tmp/INSTALL.sh -A -u"
@@ -164,7 +147,7 @@
     }
   ],
   "variables": {
-    "boot_command_prefix": "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+    "boot_command_prefix": "<enter><enter><f6><esc><wait> ",
     "cpus": "1",
     "desktop": "false",
     "disk_size": "25000",
@@ -180,9 +163,8 @@
     "memory": "3072",
     "no_proxy": "{{env `no_proxy`}}",
     "ovftool_path": "ovftool",
-    "preseed": "preseed.cfg",
-    "ssh_fullname": "misp",
-    "ssh_name": "misp",
+    "ssh_fullname": "MISP User",
+    "ssh_user": "misp",
     "ssh_pass": "Password1234",
     "update": "true",
     "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
@@ -190,4 +172,3 @@
     "vm_version": "2.4"
   }
 }
-

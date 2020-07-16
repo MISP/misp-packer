@@ -29,8 +29,8 @@ gpg: Good signature from "CIRCL MISP (CIRCL MISP VM Release Key) <misp-vm@circl.
 
 Now download the checksum file and its signature, and verify.
 
-$ wget https://www.circl.lu/misp-images/MISP_v2.4.107@latest-CHECKSUM.sfv
-$ wget https://www.circl.lu/misp-images/MISP_v2.4.107@latest-CHECKSUM.sfv.asc
+$ wget https://www.circl.lu/misp-images/latest/checksums/MISP_v2.4.107@latest-CHECKSUM.sfv
+$ wget https://www.circl.lu/misp-images/latest/checksums/MISP_v2.4.107@latest-CHECKSUM.sfv.asc
 $ gpg --verify MISP_v2.4.107@latest-CHECKSUM.sfv.asc MISP_v2.4.107@latest-CHECKSUM.sfv
 gpg: Signature made Wed 15 May 2019 07:15:10 PM JST
 gpg:                using RSA key EDEC891834F20B13

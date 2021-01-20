@@ -9,38 +9,10 @@
 # Timing creation
 TIME_START=$(date +%s)
 
-# Name of the packer
-PACKER_NAME="misp"
-PACKER_VM="MISP"
-NAME="${PACKER_NAME}-packer"
+# Please adjust config.sh accordingly
+source config.sh
 
-# Configure your user and remote server
-REMOTE=1
-REL_USER="${PACKER_NAME}-release"
-REL_SERVER="cpab"
-
-# GPG Sign
-GPG_ENABLED=1
-GPG_KEY="0x34F20B13"
-
-# Enable debug for packer, omit -debug to disable
-##PACKER_DEBUG="-debug"
-
-# Enable logging and debug for packer
-export PACKER_LOG=0
-
-REPO="MISP/MISP"
-BRANCH="2.4"
-
-# SHAsums to be computed, note the -- notatiation is for ease of use with rhash
-SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
-
-NAME_OF_INSTALLER="INSTALL.sh"
-PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
-URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
-URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
-
-### ---- NOT TOUCHY BEOYND THIS POINT, PLEASE --- ###
+### ---- NO TOUCHY BEYOND THIS POINT, PLEASE --- ###
 
 # TODO: Move into seprate file
 GOT_PACKER=$(which packer > /dev/null 2>&1; echo $?)
@@ -166,7 +138,8 @@ checkInstaller () {
     if [[ ${chsum} == ${INSTsum} ]] && [[ ${rhash_chk} == 0 ]]; then
       echo "sha${sum} matches"
     else
-      echo "sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
+      echo "Either: sha${sum}: ${chsum} does not match the installer sum of: ${INSTsum}"
+      echo "Or: rhash failed on non Zero: ${rhash_chk}"
       echo "Deleting installer, please run again."
       rm ${PATH_TO_INSTALLER}
       exit 1
@@ -214,17 +187,17 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   cat ${PACKER_NAME}.json| sed "s|\"vm_name\": \"${PACKER_VM}_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}\",|" > ${PACKER_NAME}-deploy.json
 
   # Build virtualbox VM set
-  PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json > /dev/null 2>&1 ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
+  export PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
+  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
 
   # Build vmware VM set
-  PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
+  export PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
   ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/${PACKER_NAME}-vmware.done ]]; do :; done
   while [[ ! -f /tmp/${PACKER_NAME}-vbox.done   ]]; do :; done
-
+#exit -1
   # Prevent uploading only half a build
   if [[ "$(cat /tmp/${PACKER_NAME}-vbox.done)" == "0" ]] && [[ "$(cat /tmp/${PACKER_NAME}-vmware.done)" == "0" ]]; then
     # ZIPup all the vmware stuff

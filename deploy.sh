@@ -169,18 +169,38 @@ if [[ "${LATEST_COMMIT}" != "$(cat /tmp/${PACKER_NAME}-latest.sha)" ]]; then
   # Search and replace for vm_name and make sure we can easily identify the generated VMs
   cat ${PACKER_NAME}.json| sed "s|\"vm_name\": \"${PACKER_VM}_demo\",|\"vm_name\": \"${PACKER_VM}_${VER}@${LATEST_COMMIT_SHORT}\",|" > ${PACKER_NAME}-deploy.json
 
-  # Build virtualbox VM set
-  export PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
+  if [[ -z $DEBUG ]]; then
+    # Build virtualbox VM set
+    export PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
+    ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done) &
 
   # Build vmware VM set
-  export PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
-  ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
+    export PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
+    ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done) &
+
+  else
+    echo "Disabling // builds"
+    # Build virtualbox VM set
+    export PACKER_LOG_PATH="${PWD}/packerlog-vbox.txt"
+    ($PACKER_RUN build --on-error=cleanup -only=virtualbox-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vbox.done)
+
+  # Build vmware VM set
+    export PACKER_LOG_PATH="${PWD}/packerlog-vmware.txt"
+    ($PACKER_RUN build --on-error=cleanup -only=vmware-iso ${PACKER_NAME}-deploy.json ; echo $? > /tmp/${PACKER_NAME}-vmware.done)
+    TIME_END=$(date +%s)
+    TIME_DELTA=$(expr ${TIME_END} - ${TIME_START})
+    TIME=$(convertSecs ${TIME_DELTA})
+    echo "So far the generation took ${TIME}"
+    echo ""
+    echo "Waiting for return key..."
+    read
+    #exit -1
+  fi
 
   # The below waits for the above 2 parallel packer builds to finish
   while [[ ! -f /tmp/${PACKER_NAME}-vmware.done ]]; do :; done
   while [[ ! -f /tmp/${PACKER_NAME}-vbox.done   ]]; do :; done
-#exit -1
+
   # Prevent uploading only half a build
   if [[ "$(cat /tmp/${PACKER_NAME}-vbox.done)" == "0" ]] && [[ "$(cat /tmp/${PACKER_NAME}-vmware.done)" == "0" ]]; then
     # ZIPup all the vmware stuff

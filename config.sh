@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Leave empty for NO debug messages, if run with set -x or bash -x it will enable DEBUG by default
+DEBUG=
+
+case "$-" in
+  *x*)  NO_PROGRESS=1; DEBUG=1 ;;
+  *)    NO_PROGRESS=0 ;;
+esac
+
 # Name of the packer
 PACKER_NAME="misp"
 PACKER_VM="MISP"
@@ -30,3 +38,15 @@ NAME_OF_INSTALLER="INSTALL.sh"
 PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
 URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
 URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
+
+if [[ ! -z $DEBUG ]]; then
+  echo "Debug mode enabled."
+  echo "-------------------"
+  echo ""
+  echo "Some config info:"
+  echo "Using: $NAME"
+  [[ ! -z $GPG_ENABLED ]] && echo "GnuPG enabled with key $GPG_KEY"
+  [[ ! -z $PACKER_LOG ]] && echo "Packer Log enabled."
+  [[ ! -z $REMOTE ]] && echo "Remote deploy enabled with connection string: $REL_USER@$REL_SERVER"
+fi
+

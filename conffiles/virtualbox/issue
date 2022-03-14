@@ -1,0 +1,25 @@
+Ubuntu 20.04.4 LTS \n \l
+
+Welcome to the MISP Threat Sharing VM.
+---
+
+IP address: \4{enp0s3}
+
+---
+
+MISP                http://\4{enp0s3}       admin@admin.test / admin
+                    https://\4{enp0s3}
+MISP-Modules (API)  http://\4{enp0s3}:6666  (Auth Key)
+
+The default system credentials are: misp / Password1234
+
+On VirtualBox port-forwarding from your host to the guest is in place.
+Below are the forwards as we need to use ports >1024 for some.
+
+SSH                -> 2222
+MISP               -> 8080 and 8443
+MISP-Modules (API) -> 1666 (API)
+
+If this fails, make sure the host machine is not occupying one of the forwarded ports or a firewall is active.
+
+----

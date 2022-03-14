@@ -1,0 +1,16 @@
+Ubuntu 20.04.4 LTS \n \l
+
+Welcome to the MISP Threat Sharing VM.
+---
+
+IP address: \4{ens33}
+
+---
+
+MISP                http://\4{ens33}       admin@admin.test / admin
+                    https://\4{ens33}
+MISP-Modules (API)  http://\4{ens33}:6666  (Auth Key)
+
+The default system credentials are: misp / Password1234
+
+----

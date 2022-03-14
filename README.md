@@ -1,64 +1,40 @@
 # Build Automated Machine Images for MISP
 
-Build a virtual machine for MISP based on Ubuntu 18.04 server
-(for VirtualBox or VMWare).
+Fork of misp-packer
 
-## Requirements
+Works with ubuntu 20.04.4 iso
 
-* [VirtualBox](https://www.virtualbox.org)
-* [Packer](https://www.packer.io) from the Packer website
-* *index-fancy* -> https://github.com/Vestride/fancy-index (on deployment side)
-* *rhash* -> sudo apt install rhash (on the builder side)
+Changes:
 
-## Usage
+-   .json packer file converted to hcl2 with builtin packer converter.
+-   required_plugins defined to allow installation with packer init.
+-   Variables seperated into "variables.pkr.hcl" file.
+-   Other common settings between builders turned into variables and defaults set.
+-   Default variable overides in "variables.auto.pkrvars.hcl" file.
+-   VirtualBox modifyvm variables moved to main source block where compatible.
+-   Removed VirtualBox modifyvm variables that are setting a value that is already the default.
+-   Created seperate `user-data` files as ubunu 20.04 uses `enp0s3` interface in virtualbox and `ens33` in vmware.
+-   Created seperate issue files for virtualbox and vmware due to different networking interfaces.
+-   Removed VirtualBox port forwards for Jupyter as it seems it is no longer installed.
+-   Removed VirtualBox port forwards for Viper and Misp Dashboard as current Install script staes they are broken and not installed.
+-   Boot command changed as was not working while testing.
+-   Cloud config files are now mounted as cidata instead of using http.
+-   INSTALL.sh needs placing in scripts folder as build scripts which download the file have not been updated.
+-   Output directory has changed to "output/${var.vm_name}_{{ .Builder }}/". Easy enough to change back if wanted.
+-   Post Processor checksum is used to create checksums for boxes.
 
-Launch the generation with the VirtualBox builder:
+To-do:
 
-    $./build_vbox.sh 
+-   Update .sh scripts (This was not done as I wasn't too familiar with what a lot of them did).
+-   Full Testing as I have limited experience with misp.
 
-A VirtualBox image will be generated and stored in the folder
-*output-virtualbox-iso*.
+Instructions:
+-   Read Notes
+-   Run `packer init .` to install required plugins.
+-   Place latest [INSTALL.sh]("https://raw.githubusercontent.com/MISP/MISP/2.4/INSTALL/INSTALL.sh") in scripts folder.
+-   Run `Packer build -only=vmware-iso .` for vmware build. `Packer build -only=vmware-iso.ubuntu .` on mac.
+-   Run `Packer build -only=virtualbox-iso .` for virtualbox build. `Packer build -only=virtualbox-iso.ubuntu .` on mac
+-   Run `Packer build .` to build both.
 
-Default credentials are displayed (Web interface, SSH and MariaDB) at the end
-of the process. You can directly import the image in VirtualBox.
-
-The sha1 and sha512 checksums of the generated VM will be stored in the files
-*packer_virtualbox-iso_virtualbox-iso_sha1.checksum* and
-*packer_virtualbox-iso_virtualbox-iso_sha512.checksum* respectively.
-
-In case you encounter a problem with the ``MISP_BASEURL``, you can still change
-it when the VM is running. For example the IP address of your VM is
-``172.16.100.123`` you can set ``MISP_BASEURL`` from your host with the command:
-
-    $ ssh misp@172.16.100.123 sudo -u www-data /var/www/MISP/app/Console/cake Baseurl http://172.16.100.123
-
-If you want to build an image for VMWare you will need to install it and to
-use the VMWare builder with the command:
-
-    $ packer build -only=vmware-iso misp.json
-
-You can also launch all builders in parallel.
-
-### Modules activated by default in the VM
-
-* [MISP galaxy](https://github.com/MISP/misp-galaxy)
-* [MISP modules](https://github.com/MISP/misp-modules)
-* [MISP taxonomies](https://github.com/MISP/misp-taxonomies)
-* [MISP noticelists](https://github.com/MISP/misp-noticelist)
-* [MISP warninglists](https://github.com/MISP/misp-warninglists)
-* [MISP ZMQ](https://github.com/MISP/misp-book/tree/master/misp-zmq)
-* [MISP dashboard](https://github.com/MISP/misp-dashboard)
-
-## Automatic export to GitHub
-
-    $ GITHUB_AUTH_TOKEN=<your-github-auth-token>
-    $ TAG=$(curl https://api.github.com/repos/MISP/MISP/releases/latest | jq  -r '.tag_name')
-    $ ./upload.sh github_api_token=$GITHUB_AUTH_TOKEN owner=MISP repo=MISP tag=$TAG filename=./output-virtualbox-iso/MISP_demo.ova
-
-## Upload latest release
-
-curl -s https://api.github.com/repos/MISP/MISP/tags  |jq -r '.[0] | .name'
-
-
-You can add these lines in the *post-processors* section of the file
-*misp.json* if you want to automate the process.
+Notes:
+-   Timing is important, different hosts load at different speeds, boot_wait needs changing to suit the build host. Seperate variables exist for Virtualbox and VMWare.

@@ -1,0 +1,28 @@
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: true
+    preserve_sources_list: true
+  identity:
+    hostname: misp-vm
+    username: 'misp'
+    password: '$6$Zw5jtOmRPBqrzFT7$st/15FZrcYhlt7bgv70ILUsPfzEuFumiZF.CdXJ9VdVXXLHI4WIjJ6MS/5g3410L1ogCO5O7B7ro.XEFZ2P0o0'
+  keyboard:
+    layout: us
+    variant: ''
+  locale: en_US
+  network:
+    network:
+      version: 2
+      ethernets:
+        enp0s3:
+          dhcp4: true
+          dhcp-identifier: mac
+  ssh:
+    allow-pw: true
+    authorized-keys: []
+    install-server: true
+  storage:
+    layout:
+        name: lvm

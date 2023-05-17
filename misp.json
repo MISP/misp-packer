@@ -174,9 +174,9 @@
     "https_proxy": "{{env `https_proxy`}}",
     "iso_checksum": "7514fceffc9ddc636f97c69e330976ffc88652842e700ba20f9a41b4ede34f56990777da883b845f769d22c444660c7982bc08be8007a68251e7013d97c16185",
     "iso_checksum_type": "sha512",
-    "iso_name": "ubuntu-18.04.6-server-amd64.iso",
+    "iso_name": "ubuntu-20.04.6-server-amd64.iso",
     "iso_path": "iso",
-    "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.6-server-amd64.iso",
+    "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-20.04.6-server-amd64.iso",
     "memory": "3072",
     "no_proxy": "{{env `no_proxy`}}",
     "ovftool_path": "ovftool",
@@ -186,7 +186,7 @@
     "ssh_pass": "Password1234",
     "update": "true",
     "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
-    "vm_name": "MISP_demo",
+    "vm_name": "MISP_demo_rawane",
     "vm_version": "2.4"
   }
 }

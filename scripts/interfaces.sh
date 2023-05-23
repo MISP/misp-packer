@@ -10,7 +10,7 @@
 echo "--- Using old style name (ethX) for interfaces"
 sed -r 's/^(GRUB_CMDLINE_LINUX=).*/\1\"net\.ifnames=0\ biosdevname=0\"/' /etc/default/grub | sudo tee /etc/default/grub > /dev/null
 
-# install ifupdown since ubuntu 18.04
+# install ifupdown since ubuntu 20.04
 sudo apt update
 sudo apt install ifupdown -qqy
 

@@ -258,7 +258,7 @@
     "ssh_pass": "Password1234",
     "update": "true",
     "vm_description": "MISP, is an open source software solution for collecting, storing, distributing and sharing cyber security indicators and threat about cyber security incidents analysis and malware analysis. MISP is designed by and for incident analysts, security and ICT professionals or malware reverser to support their day-to-day operations to share structured informations efficiently.",
-    "vm_name": "MISP_demo_rawane",
+    "vm_name": "MISP_rawane_demo",
     "vm_version": "2.4"
   }
 }

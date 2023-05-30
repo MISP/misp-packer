@@ -39,6 +39,8 @@ PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
 URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
 URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
 
+UBUNTU_VERSION="20.04"  # Update to Ubuntu 20.04
+
 if [[ ! -z $DEBUG ]]; then
   echo "Debug mode enabled."
   echo "-------------------"

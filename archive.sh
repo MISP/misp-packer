@@ -15,3 +15,4 @@ for VERSION in `echo ${VERSIONS}`; do
     fi
     find . -maxdepth 1 -type d -name MISP_v${VERSION}\* -exec rm -rv {} \;
 done
+

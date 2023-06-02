@@ -8,19 +8,23 @@
 # $ cp /tmp/interfaces.sh .
 
 echo "--- Using old style name (ethX) for interfaces"
-sed -r 's/^(GRUB_CMDLINE_LINUX=).*/\1\"net\.ifnames=0\ biosdevname=0\"/' /etc/default/grub | sudo tee /etc/default/grub > /dev/null
+sed -i 's/^\(GRUB_CMDLINE_LINUX=\).*/\1"net.ifnames=0 biosdevname=0"/' /etc/default/grub
 
-# install ifupdown since ubuntu 20.04
+# install ifupdown since ubuntu 18.04
 sudo apt update
 sudo apt install ifupdown -qqy
 
 # enable eth0
 echo "--- Configuring eth0"
 
-cat >> /etc/network/interfaces << EOF
-# The primary network interface
-auto eth0
-iface eth0 inet dhcp
+cat >> /etc/netplan/01-netcfg.yaml << EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: true
 EOF
 
-update-grub > /dev/null 2>&1
+netplan apply
+

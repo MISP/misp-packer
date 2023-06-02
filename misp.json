@@ -248,7 +248,7 @@
     "iso_checksum_type": "sha512",
     "iso_name": "ubuntu-20.04.6-server-amd64.iso",
     "iso_path": "iso",
-    "iso_url": "http://cdimage.ubuntu.com/ubuntu/releases/focal/release/ubuntu-20.04.6-server-amd64.iso",
+    "iso_url": "https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-desktop-amd64.iso",
     "memory": "3072",
     "no_proxy": "{{env `no_proxy`}}",
     "ovftool_path": "ovftool",

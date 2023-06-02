@@ -32,3 +32,4 @@ rm /etc/apt/apt.conf.d/99progressbar
 # End Cleaning
 echo "VM cleaned and rebooting for automagic reas0ns."
 reboot
+

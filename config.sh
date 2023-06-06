@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Laissez vide pour désactiver les messages de débogage. S'il est exécuté avec set -x ou bash -x, il activera le mode DEBUG par défaut.
+# Leave empty for NO debug messages, if run with set -x or bash -x it will enable DEBUG by default
 DEBUG=
 
 case "$-" in
@@ -8,12 +8,12 @@ case "$-" in
   *)    NO_PROGRESS=0 ;;
 esac
 
-# Nom du packer
+# Name of the packer
 PACKER_NAME="misp"
 PACKER_VM="MISP"
 NAME="${PACKER_NAME}-packer"
 
-# Configurez votre utilisateur et serveur distant
+# Configure your user and remote server
 REMOTE=1
 REL_USER="${PACKER_NAME}-release"
 REL_SERVER="cpab"
@@ -22,16 +22,16 @@ REL_SERVER="cpab"
 GPG_ENABLED=1
 GPG_KEY="0x34F20B13"
 
-# Activer le débogage pour packer, omettre -debug pour le désactiver
+# Enable debugging for packing, omit -debug to disable it
 ##PACKER_DEBUG="-debug"
 
-# Activer l'enregistrement et le débogage pour packer
+# Enable logging and debug for packer
 export PACKER_LOG=1
 
 REPO="MISP/MISP"
 BRANCH="2.4"
 
-# SOMmes de contrôle à calculer, notez la notation -- pour faciliter l'utilisation avec rhash
+# SHAsums to be computed, note the -- notatiation is for ease of use with rhash
 SHA_SUMS="--sha1 --sha256 --sha384 --sha512"
 
 NAME_OF_INSTALLER="INSTALL.sh"
@@ -39,15 +39,15 @@ PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
 URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
 URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
 
-UBUNTU_VERSION="20.04"  # Mettez à jour vers Ubuntu 20.04
+UBUNTU_VERSION="20.04"  # Upgrade to Ubuntu 20.04. 
 
 if [[ ! -z $DEBUG ]]; then
-  echo "Mode de débogage activé."
+  echo "Debug mode enabled."
   echo "-------------------"
   echo ""
-  echo "Informations de configuration :"
-  echo "Utilisation de : $NAME"
-  [[ ! -z $GPG_ENABLED ]] && echo "GnuPG activé avec la clé $GPG_KEY"
-  [[ ! -z $PACKER_LOG ]] && echo "Enregistrement Packer activé."
-  [[ ! -z $REMOTE ]] && echo "Déploiement distant activé avec la chaîne de connexion : $REL_USER@$REL_SERVER"
+  echo "Some config info:"
+  echo "Using: $NAME"
+  [[ ! -z $GPG_ENABLED ]] && echo "GnuPG enabled with key $GPG_KEY"
+  [[ ! -z $PACKER_LOG ]] && echo "Packer Log enabled."
+  [[ ! -z $REMOTE ]] && echo "Remote deploy enabled with connection string: $REL_USER@$REL_SERVER"
 fi

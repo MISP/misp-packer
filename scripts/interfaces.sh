@@ -6,7 +6,6 @@
 ## As a quick reference, you cat generate with xsnippet:
 # $ xsnippet /tmp/ $PATH_TO_MISP/docs/generic/ethX.md
 # $ cp /tmp/interfaces.sh .
-
 echo "--- Using old style name (ethX) for interfaces"
 sed -i 's/^\(GRUB_CMDLINE_LINUX=\).*/\1"net.ifnames=0 biosdevname=0"/' /etc/default/grub
 
@@ -17,14 +16,10 @@ sudo apt install ifupdown -qqy
 # enable eth0
 echo "--- Configuring eth0"
 
-cat >> /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      dhcp4: true
+cat >> /etc/network/interfaces << EOF
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
 EOF
 
-netplan apply
-
+update-grub > /dev/null 2>&1

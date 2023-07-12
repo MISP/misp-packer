@@ -22,7 +22,7 @@ REL_SERVER="cpab"
 GPG_ENABLED=1
 GPG_KEY="0x34F20B13"
 
-# Enable debug for packer, omit -debug to disable
+# Enable debugging for packing, omit -debug to disable it
 ##PACKER_DEBUG="-debug"
 
 # Enable logging and debug for packer
@@ -39,6 +39,8 @@ PATH_TO_INSTALLER="scripts/${NAME_OF_INSTALLER}"
 URL_TO_INSTALLER="https://raw.githubusercontent.com/${REPO}/${BRANCH}/INSTALL/${NAME_OF_INSTALLER}"
 URL_TO_LICENSE="https://raw.githubusercontent.com/${REPO}/${BRANCH}/LICENSE"
 
+UBUNTU_VERSION="20.04"  # Upgrade to Ubuntu 20.04. 
+
 if [[ ! -z $DEBUG ]]; then
   echo "Debug mode enabled."
   echo "-------------------"
@@ -49,4 +51,3 @@ if [[ ! -z $DEBUG ]]; then
   [[ ! -z $PACKER_LOG ]] && echo "Packer Log enabled."
   [[ ! -z $REMOTE ]] && echo "Remote deploy enabled with connection string: $REL_USER@$REL_SERVER"
 fi
-
